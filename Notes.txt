@@ -1,0 +1,3 @@
+Bugs in version.pm
+
+    1._1 produces garbage

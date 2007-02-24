@@ -1,0 +1,541 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use Carp;
+use Getopt::Long;
+use Pod::Usage;
+use File::HomeDir;
+use File::Spec;
+use YAML;
+
+$| = 1;
+
+use version; our $VERSION = qv( '0.0.1' );
+
+my $RCFILE   = '.versioneer.rc';
+my $UNDOFILE = '.versioneer.undo';
+my $MANIFEST = 'MANIFEST';
+my @RCPATH   = ( '.', File::HomeDir->my_home, '/etc' );
+
+# Regexes to classify file types. Can be overridden in .versioneer.rc
+my %FILE_TYPES = (
+    change_file => qr{ ^ C(?i:hanges) $ }x,
+    meta_file   => qr{ (?: (?: META[.]yml ) | MANIFEST ) $ }x,
+    build_file  => qr{ ^ (?: Build | Makefile ) [.] PL $ }x,
+);
+
+my $VERSION_MATCH = qr{ \d [\d._]+ \d (?i: [a-z]? ) }x;
+
+# Default config
+my %DEFAULTS = (
+    version_line => qr{ ^ ( (?: (?: \S .+ )? (?i: \bversion ) \s+ ) 
+                                        | 
+                            (?: .* \$VERSION \s* = .*? ) )
+                              ( $VERSION_MATCH ) 
+                              ( .* ) $ }xms,
+    %FILE_TYPES
+);
+
+my (
+    $man, $help, $report, $manifest, $verbose, $increment,
+    $set, $undo, $redo,   $force,    $backup
+);
+
+GetOptions(
+    'help|?'       => \$help,
+    'man'          => \$man,
+    'manifest|M:s' => \$manifest,
+    'verbose'      => \$verbose,
+    'report'       => \$report,
+    'increment:s'  => \$increment,
+    'set=s'        => \$set,
+    'undo'         => \$undo,
+    'redo'         => \$redo,
+    'force'        => \$force,
+    'backup:s'     => \$backup,
+
+    # 'extension=s' => \@ext,
+    # 'path=s'      => \@okpath,
+    # 'feed=s'      => \@feed,
+    # 'filter'      => \$filter,
+    # 'csv'         => \$csv,
+    # 'table'       => \$table,
+    # 'db=s'        => \$db,
+    # 'logformat=s' => \$format,
+    # 'outdir=s'    => \$outdir,
+    # 'index=s'     => \$index,
+    # 'style=s'     => \$style,
+    # 'width=i'     => \$graph_w,
+    # 'height=i'    => \$graph_h,
+    # 'title=s'     => \$title
+) or pod2usage( 2 );
+
+pod2usage( -exitstatus => 0, -verbose => 2 ) if $man;
+pod2usage( 1 ) if $help;
+
+# Read configuration
+my $config = read_rc( default_rc(), $RCFILE, @RCPATH );
+
+#print Dump( $config );
+
+my $type_action;
+
+if ( $report ) {
+    $type_action = {
+        normal_file => sub {
+            my ( $file, $type ) = @_;
+            my $match = $config->{version_line};
+            print "Scanning $file\n";
+            with_file(
+                $file, '<',
+                sub {
+                    my $fh = shift;
+                    while ( defined( my $line = <$fh> ) ) {
+                        chomp $line;
+                        if ( $line =~ $match ) {
+                            my ( $pre, $ver, $post ) = ( $1, $2, $3 );
+                            my @ver = parse_version( $ver );
+                            print "$pre [[[ "
+                              . join( ' ][ ', @ver )
+                              . " ]]] $post\n";
+                        }
+                    }
+                }
+            );
+        },
+        else => sub {
+            my ( $file, $type ) = @_;
+            print "Ignoring $file ($type)\n";
+        },
+    };
+}
+else {
+    $type_action = {
+        else => sub {
+            my $file = shift;
+            print "Scanning $file\n";
+        },
+    };
+}
+
+my $file_action = sub {
+    my $name = shift;
+    my $type = file_type( $config, $name );
+
+    my $action = $type_action->{$type} || $type_action->{else}
+      or die "No action defined for $name (type = $type)\n";
+
+    $action->( $name, $type );
+};
+
+if ( defined $manifest ) {
+    $manifest ||= $MANIFEST;
+
+    my ( $vol, $dirs, $leaf ) = File::Spec->splitpath( $manifest );
+
+    with_lines(
+        $manifest,
+        sub {
+            my $name = shift;
+
+            # Trailing comments allowed in MANIFEST
+            $name =~ s{\s+#.*}{};
+
+            $file_action->( File::Spec->catpath( $vol, $dirs, $name ) );
+        }
+    );
+}
+else {
+    my @work = @ARGV
+      or pod2usage( 2 );
+
+    while ( my $obj = shift @work ) {
+        if ( -d $obj ) {
+            opendir( my $dh, $obj ) or die "Can't read $obj ($!)\n";
+            push @work, map { File::Spec->catfile( $obj, $_ ) }
+              grep { $_ !~ m{ ^ [.] }x } readdir $dh;
+            close $dh;
+        }
+        else {
+            $file_action->( $obj );
+        }
+    }
+}
+
+sub parse_version {
+    my $ver = shift;
+    my @ver = grep { defined } (
+        $ver =~ m{ ^ ( \d+ ) 
+                        (?: ([.]) ( \d{1,3} ) 
+                            (?: ( [_.]? ) ( \d{1,3} ) )? 
+                            ( [a-zA-z] )? ) $ }x
+    );
+    return @ver if @ver >= 3 && @ver <= 6;
+    return $ver;
+}
+
+sub with_file {
+    my ( $name, $mode, $callback ) = @_;
+
+    open( my $fh, $mode, $name ) or die "Can't $mode $name ($!)\n";
+    $callback->( $fh );
+    close( $fh );
+}
+
+sub with_lines {
+    my ( $name, $callback ) = @_;
+
+    with_file(
+        $name, '<',
+        sub {
+            my $fh = shift;
+            LINE:
+            while ( defined( my $line = <$fh> ) ) {
+                chomp $line;
+                next LINE if $line =~ m{ ^ \s* (?: \# | $ ) }xms;
+                $callback->( $line );
+            }
+        }
+    );
+}
+
+sub find_file {
+    my $name = shift;
+    my @path = @_;
+
+    for my $p ( @path ) {
+        my $full_name = File::Spec->catfile( $p, $name );
+        return $full_name if -e $full_name;
+    }
+
+    return;
+}
+
+sub file_type {
+    my ( $config, $name ) = @_;
+
+    return 'directory' if -d $name;
+
+    my ( $dev, $path, $leaf ) = File::Spec->splitpath( $name );
+
+    for my $type ( keys %FILE_TYPES ) {
+        return $type if is_file( $config, $type, $leaf );
+    }
+
+    return 'normal_file';
+}
+
+sub is_file {
+    my ( $config, $type, $name ) = @_;
+
+    if ( my $pattern = $config->{$type} ) {
+        return $name =~ $pattern;
+    }
+
+    return;
+}
+
+# Establish default config
+sub default_rc {
+    return {%DEFAULTS};
+}
+
+sub read_rc {
+    my $config = shift;
+
+    if ( my $name = find_file( @_ ) ) {
+        my $key;
+
+        with_lines(
+            $name,
+            sub {
+                my $line = shift;
+                if ( $line =~ m{ ^ \s+ ( .+ ) }xms ) {
+                    die "Illegal continuation at $name, line $.\n"
+                      unless defined $key;
+                    $config->{$key} .= ' ' . $1;
+                }
+                elsif (
+                    $line =~ m{ ^ ( \w+ )
+                                  (?: (?: \s* [=:] \s* ) | \s+ ) \s*
+                                  ( .* )
+                              }xms
+                  ) {
+                    exists $DEFAULTS{ $key = $1 }
+                      or die "Unknown config option $key at $name, line $.\n";
+                    $config->{$key} = $2;
+                }
+                else {
+                    die "Bad syntax at $name, line $.\n";
+                }
+            }
+        );
+    }
+
+    return $config;
+}
+
+__END__
+
+=head1 NAME
+
+versioneer - Manage version numbers in EUMM based Perl projects
+
+=head1 VERSION
+
+This document describes versioneer version 0.0.1
+
+=head1 SYNOPSIS
+
+podalyzer [options] [file ...]
+
+
+ Options:
+
+    -title=[text]           specify the title of the report
+    -outdir=[dir]           specify the output directory for the report
+    -index=[name.html]      specify the name of the start page of the 
+                            report
+    -style=[uri]            specify the URI relative to the report 
+                            directory of the stylesheet to use
+    -extension=[ext,...]    specify the filename extension(s) to be 
+                            recognised as media files
+    -path=[path,...]        specify the paths where media files should
+                            be recognised
+    -feed=[url]             specify the URL of the feed to enable feed
+                            analysis
+    -db=[file]              name of a file to contain file path to 
+                            podcast name mappings
+    -logformat=[format]     specify the format of the log file; 
+                            currently 'common' and 'extended' are 
+                            supported
+    -width=[width]          specify the width of the graphs
+    -height=[height]        specify the height of the graphs
+    -filter                 don't produce report; instead output those
+                            lines from the log that would have been 
+                            included in the report
+    -csv                    output the matching log lines in CSV format
+    -help                   see this summary
+    -man                    see this text as a man page
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<-title>
+
+Specify the title of the report. The title is included at the top of
+each page.
+
+=item B<-outdir>
+
+The destination directory for the report. If it doesn't exist it will
+be created.
+
+=item B<-index>
+
+Specify the name of the starting page of the report. All other pages and
+images in the report will have names based on this name in such a way
+that multiple reports can be generated in the same directory without
+clobbering each other's files.
+
+=item B<-style>
+
+Specify the URI relative to the report directory of a stylesheet to be
+used for the report. If no stylesheet is named here a default stylesheet
+(called style.css) will be generated in the output directory.
+
+=item B<-extension>
+
+By default B<podalyzer> recognises a number of common extensions that
+are used for media files. Specifically:
+
+    mp3 mp4 m4a m4b m4p m4u m4v mpeg mpg mpe mxu mov aac ogg wma asx pdf
+
+If you have files with extensions not in this list that you wish to have
+included in the report you should name I<all> of the extensions you are
+using like this:
+
+    podalyzer -extension=mp2,wav,au
+
+Note that the first use of B<-extension> overrides the built in list
+so you may have to name extensions that would normally be recognised
+by default.
+
+=item B<-path>
+
+Limit the files included in the report to those found in the specified
+subdirectories like this:
+
+    podalyzer -path=/media,/podcast/released
+
+If no paths are specified the report will include files in any directory
+on the server.
+
+=item B<-feed>
+
+Specify the URL of the feed(s) for any podcast(s) you are analysing. May
+be used more than once to specify multiple feeds.
+
+Specifying the feed URL enables extra functionality in Podalyzer to
+analyse the number of feed subscribers by day and the proportion of
+downloads that originate from subscribers to the feed.
+
+If using Podalyzer in filter or csv modes specify any feed URLs to have
+the feeds included in the filtered output.
+
+=item B<-db>
+
+Provide the name of a text file that records the relationship between
+filenames on the server (such as F</media/podcast001.mp3>) and the name
+of the show they correspond to (such as 'Brand New Podcast Show 1'). By
+default B<podalyzer> will make up a show name based on the filename (it
+would choose 'podcast001.mp3' in the example above). If you wish you can
+maintain a file that lists the correspondance between filenames and show
+names, for example:
+
+    /media/podcast001.mp3   Brand New Podcast Show 1
+    /media/podcast002.mp3   Podcast 2 from me
+    /media/podcast003.mp3   podcast003.mp3
+
+Each time podalyzer runs it will add to this file any missing entries
+corresponding to media files it has not seen before. The third entry in
+the example above has been generated in this way. To have podcast003.mp3
+correctly named in the report either edit the database file to correct
+the name or use B<podfeeder> to create mappings automatically.
+
+=item B<-logformat>
+
+Tell B<podalyzer> what format to expect the raw logfiles in. Currently
+'common' and 'extended' are supported - corresponding to Common Log
+Format and Extended Common Log format respectively. If you have logs in
+a format that isn't supported please provide a representative sample to
+me (andy@hexten.net) and I'll add support for it.
+
+=item B<-width>
+
+Set the width of generated graphs. Defaults to 400.
+
+=item B<-height>
+
+Set the height of generated graphs. Defaults to 300.
+
+=item B<-filter>
+
+Instead of producing a report output the lines from the input log files
+that would have been processed. Can be used to produce filtered log
+files that contain only interesting data.
+
+=item B<-csv>
+
+Instead of producing a report output the lines that would have been
+processed as a CSV file.
+
+=back
+
+=head1 DESCRIPTION
+
+B<podalyzer> scans one or more web server log files, extracts entries
+that result from downloads of media files (typically podcasts) and
+generates a report based on those entries. In addition to reporting the
+number and size of downloaded files it generates a number of graphs
+showing downloads over time, downloads per 'show' and (if the Geo::IP
+module is installed) a breakdown by country.
+
+
+The names of one or more log files are passed on the command line. Any
+directories named on the command line will be recursively searched. Note
+that if the directory or any of its sub-directories contain non-log
+files B<podalyzer> will attempt to process them too. If any files named
+on the command line have the extension B<gz> podalyzer will attempt to
+expand them using the command B<gzip -cd> I<filename>. If this command
+is not available on your system attempts to expand gzip compressed log
+files will fail.
+
+The B<-path> and B<-extension> options allow fine control over the
+request URIs that are included in the report. The B<-db> option allows a
+'database' (actually a regular text file) to be named that will provide
+mapping between request URIs (such as F</media/podcast001.mp3>) and show
+names (such as 'My Podcast Show 1'). The B<podfeeder> program (which
+should have been distributed with this program) allows a show mapping
+database to be generated from an RSS feed.
+
+
+When the B<-filter> option is specified podalyzer outputs any lines from
+the input log file that match the criteria specified with B<-path> and
+B<-extension> - in effect producing a new log file containing only lines
+of interest to podalyzer. This is useful in situations where the logs
+contain a large number of entries that are not interesting to podalyzer.
+Assuming the logs are rotated regularly, B<podalyzer -filter> may be
+used to maintain a directory of filtered log files containing only the
+interesting lines from the (potentially huge) original logs. As
+podalyzer must rescan all the relevant log files each times it runs this
+can greatly speed up processing.
+
+
+=head1 EXAMPLES
+
+A shell script that uses podalyser in filter mode to maintain a
+directory of podcast specific log files and then runs podalyser in
+normal report generation mode to produce a report from those logs:
+
+
+    #!/bin/sh
+
+    podalyzer=/root/bin/podalyzer
+    podfeeder=/root/bin/podfeeder
+
+    feed=http://example.com/category/podcasts/feed
+    title='My Podcast'
+
+    webroot=/usr/local/apache-php
+    logdir=$webroot/logs
+    filtlogdir=podcasts
+
+    outdir=$webroot/htdocs/stats
+
+    cd $logdir
+    mkdir -p $filtlogdir
+
+    # Update filtered logs
+    for log in access_log*
+    do
+        # Make the name of the podcast log file
+        flog=`echo $filtlogdir/$log | sed -e 's/\.gz$//'`
+        # If the main log is newer than the podcast log
+        # or the podcast log doesn't yet exist use
+        # podalyzer in filter mode to create it
+        if [ ! -f $flog -o $log -nt $flog ]
+        then
+            $podalyzer --filter $log > $flog
+        fi
+    done
+
+    # Read feed
+    $podfeeder --db=shows.db --force $feed
+    # Generate report
+    $podalyzer --db=shows.db --outdir=$outdir --title="$title" $filtlogdir
+
+=head1 SEE ALSO
+
+podfeeder
+
+=head1 AUTHORS
+
+Written by Andy Armstrong (andy@hexten.net) with much inspiration
+from Kevin Devin (Friends in Tech). Kevin's podstats script may be
+found here:
+
+http://forums.friendsintech.com/viewtopic.php?t=\
+   40&sid=055c024f369658b97e01dd7ef282d71d
+
+(url wrapped for formatting - here is a shorter version:
+http://lyxus.net/cfv)
+
+=head1 BUGS
+
+If you find any please report them to andy@hexten.net.
+
+=cut
+
