@@ -10,6 +10,7 @@ my %EXE = (
         PREREQ_PM => {
             'Getopt::Long' => '2.34',
             'Pod::Usage'   => '1.3',
+            'File::Slurp'  => '9999.12',
         },
         EXE_FILES => ['examples/perl-reversion'],
     }

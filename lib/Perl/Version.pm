@@ -61,7 +61,7 @@ BEGIN {
         *$inc_func = sub {
             my $self = shift;
             return $self->increment( $field );
-          }
+        };
     }
 }
 
@@ -353,6 +353,18 @@ sub increment {
         }
         $self->alpha( 0 );
     }
+}
+
+sub set {
+    my $self  = shift;
+    my $other = shift;
+
+    $other = __PACKAGE__->new( $other ) unless ref $other;
+
+    my @comp = $other->components;
+
+    $self->components( \@comp );
+    $self->alpha( $other->alpha );
 }
 
 1;
@@ -776,6 +788,19 @@ Get or set the alpha component of a version. Returns 0 for versions with no alph
 =item C<< is_alpha >>
 
 Return true if a version has a non-zero alpha component.
+
+=item C<< set >>
+
+Set the version to match another version preserving the formatting of this version.
+
+    $version->set( $other_version );
+
+You may also set the version from a literal string:
+
+    $version->set( '1.2.3' );
+
+The version will be updated to the value of the version string but will
+retain its current formatting.
 
 =back
 
