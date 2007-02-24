@@ -3,9 +3,9 @@ package Perl::Version;
 use warnings;
 use strict;
 use Carp;
-use Scalar::Util qw( blessed isvstring );
+use Scalar::Util qw( blessed );
 
-use version; our $VERSION = qv( '0.0.3' );
+use version; our $VERSION = qv( '0.0.4' );
 
 use overload (
     '""'  => \&stringify,
@@ -105,7 +105,7 @@ sub _parse {
     my $self = shift;
 
     # Check for vstring before anything else happens
-    if ( isvstring $_[0] ) {
+    if ( $] >= 5.008_001 && Scalar::Util::isvstring $_[0] ) {
         $self->{format} = {%NORMAL_FORMAT};
         my @parts = map { ord } split //, shift;
         $self->{version} = \@parts;
@@ -364,7 +364,7 @@ Perl::Version - Parse and manipulate Perl version strings
 
 =head1 VERSION
 
-This document describes Perl::Version version 0.0.3
+This document describes Perl::Version version 0.0.4
 
 =head1 SYNOPSIS
 
