@@ -1,4 +1,5 @@
 Changes
+examples/perl-reversion
 lib/Perl/Version.pm
 Makefile.PL
 MANIFEST

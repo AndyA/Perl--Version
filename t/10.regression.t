@@ -744,6 +744,28 @@ BEGIN {
             normal    => 'v2.0.0',
             numify    => '2.000000',
         },
+        
+        # Setting value
+        {
+            name => 'Three components, last padded to three digits, long alpha, set',
+            new_arg => 'v1.2.034',
+            action  => sub {
+                $_->set( '2.0.0' );
+            },
+            stringify => 'v2.0.000',
+            normal    => 'v2.0.0',
+            numify    => '2.000000',
+        },
+        {
+            name => 'Three components, last padded to three digits, long alpha, set to another version',
+            new_arg => 'v1.2.034',
+            action  => sub {
+                $_->set( Perl::Version->new('2.3.4') );
+            },
+            stringify => 'v2.3.004',
+            normal    => 'v2.3.4',
+            numify    => '2.003004',
+        },
 
         # Misc formatting
         {

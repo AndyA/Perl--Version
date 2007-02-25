@@ -5,6 +5,17 @@ use ExtUtils::MakeMaker;
 eval 'use ExtUtils::MakeMaker::Coverage';
 warn "Optional ExtUtils::MakeMaker::Coverage not available\n" if $@;
 
+my %EXE = (
+    'perl-reversion' => {
+        PREREQ_PM => {
+            'Getopt::Long' => '2.34',
+            'Pod::Usage'   => '1.3',
+            'File::Slurp'  => '9999.12',
+        },
+        EXE_FILES => ['examples/perl-reversion'],
+    }
+);
+
 my %ARGS = (
     NAME          => 'Perl::Version',
     AUTHOR        => 'Andy Armstrong <andy@hexten.net>',
@@ -22,5 +33,22 @@ my %ARGS = (
 );
 
 $ARGS{SIGN} = 1 if MM->can( 'signature_target' );
+
+while ( my ( $exe, $spec ) = each %EXE ) {
+    my $yn = prompt( "Install $exe script?", "N" );
+    if ( $yn =~ /^y/i ) {
+        while ( my ( $key, $val ) = each %$spec ) {
+            if ( ref $val eq 'HASH' ) {
+                $ARGS{$key} = { %{ $ARGS{$key} || {} }, %$val };
+            }
+            elsif ( ref $val eq 'ARRAY' ) {
+                push @{ $ARGS{$key} }, @$val;
+            }
+            else {
+                die "Can't merge $key: value not handled\n";
+            }
+        }
+    }
+}
 
 WriteMakefile( %ARGS );
