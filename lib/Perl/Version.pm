@@ -5,7 +5,7 @@ use strict;
 use Carp;
 use Scalar::Util qw( blessed );
 
-use version; our $VERSION = qv( '0.0.4' );
+use version; our $VERSION = qv( '0.0.5' );
 
 use overload (
     '""'  => \&stringify,
@@ -376,7 +376,7 @@ Perl::Version - Parse and manipulate Perl version strings
 
 =head1 VERSION
 
-This document describes Perl::Version version 0.0.4
+This document describes Perl::Version version 0.0.5
 
 =head1 SYNOPSIS
 

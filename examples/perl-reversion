@@ -65,18 +65,18 @@ my @MAGIC = (
 
 my $man     = 0;
 my $help    = 0;
-my $verbose = 0;
 my $bump    = 0;
 my $current = undef;
 my $set     = undef;
+my $normal  = undef;
 
 GetOptions(
     'help|?'    => \$help,
     'man'       => \$man,
-    'v'         => \$verbose,
     'current=s' => \$current,
     'set=s'     => \$set,
     'bump'      => \$bump,
+    'normal'    => \$normal,
 ) or pod2usage( 2 );
 
 pod2usage( 1 ) if $help;
@@ -130,9 +130,12 @@ elsif ( $bump ) {
         $new_ver->increment( $pos - 1 );
     }
 }
+else {
+    note( "Current project version is $got[0]\n" );
+}
 
 if ( defined $new_ver ) {
-    set_versions( \%documents, $versions, $new_ver );
+    set_versions( \%documents, $versions, $new_ver, $normal );
     save_all( \%documents );
 }
 
@@ -160,6 +163,7 @@ sub set_versions {
     my $versions    = shift;
     my $new_version = shift
       or die "Internal: no version specified";
+    my $normal = shift;
 
     note( "Setting version to $new_version\n" );
 
@@ -168,7 +172,12 @@ sub set_versions {
         for my $edit ( @$edits ) {
             my $info = $edit->{info};
 
-            $edit->{ver}->set( $new_version );
+            if ( $normal ) {
+                $edit->{ver} = $new_version;
+            }
+            else {
+                $edit->{ver}->set( $new_version );
+            }
 
             $info->{lines}->[ $edit->{line} ]
               = $edit->{pre} . $edit->{ver} . $edit->{post} . "\n";
@@ -242,7 +251,7 @@ sub find_versions {
     my $ver_found = {};
 
     while ( my ( $name, $info ) = each %$docs ) {
-        note( "Scanning $name\n" );
+        note( "Scanning $name" );
 
         my $machine = $machines{ $info->{type} }
           or die "Internal: can't find state machine for type ", $info->{type};
@@ -271,6 +280,7 @@ sub find_versions {
                                 ver  => $ver,
                                 post => $5
                               };
+                            note( " $ver" );
                         }
 
                         if ( my $goto = $trans->{goto} ) {
@@ -281,6 +291,7 @@ sub find_versions {
                 }
             }
         }
+        note( "\n" );
     }
 
     return $ver_found;
@@ -322,7 +333,7 @@ sub save_all {
 }
 
 sub note {
-    print join( '', @_ ) if $verbose;
+    print join( '', @_ );
 }
 
 sub find_proj_files {
@@ -421,32 +432,70 @@ __END__
 
 =head1 NAME
 
-perl-reversion - Replace duplicate files with hard links
+perl-reversion - Manipulate project version numbers
 
 =head1 SYNOPSIS
 
-perl-reversion [options] [dir1 dir2 ...]
+perl-reversion [options] [file ...]
 
  Options:
 
-    -help          see this summary
-    -man           view man page for perl-reversion
-    -v             verbose mode
+    -help               see this summary
+    -man                view man page for perl-reversion
+    -bump               make the smallest possible increment
+    -set <version>      set the project version number
+    -current <version>  specify the current version
+    -normal             normalise version strings
 
 =head1 DESCRIPTION
 
-Given a number of directories that are (partial) copies of each other
-replace files that are shared between them with hard links to a
-single file.
+A typical distribution of a Perl module has embedded version numbers is
+a number of places. Typically the version will be mentioned in the
+README file and in each module's source. For a module the version may
+appear twice: once in the code and once in the pod.
 
-No attempt is made to verify that the files' contents match. The most
-recently modified file is chosen as the version to be linked to.
+This script makes it possible to update all of these version numbers
+with a simple command.
 
-=head1 EXAMPLES
+To update the version numbers of specific files name them on the command
+line. Any directories will be recursively expanded.
 
-    # Make sure that files shared between cpan and backpan mirrors are
-    # hard links to a single file.
-    perl-reversion /usr/share/cpan /usr/share/backpan
+If used with no filename arguments perl-reversion will attempt to update
+README and any files below lib/ in the current project.
+
+=head1 OPTIONS
+
+=over
+
+=item C<< -bump >>
+
+Attempt to make the smallest possible increment to the version. The
+least significant part of the version string is incremented.
+
+    1       =>  2
+    1.1     =>  1.2
+    1.1.1   =>  1.1.2
+    1.1.1_1 =>  1.1.1_2
+
+=item C<< -set <version> >>
+
+Set the version to the specified value. Unless the C<-normal> option is
+also specified the format of each individual version string will be
+preserved.
+
+=item C<< -current <version> >>
+
+Specify the current version. Only matching version strings will
+be updated.
+
+=item C<< -normal >>
+
+Update version strings to have the same formatting as the new
+version string provided with C<< -set >>. If this option is not
+specied perl-reversion will preserve the formatting of each
+individual version string.
+
+=back
 
 =head1 AUTHOR
 
