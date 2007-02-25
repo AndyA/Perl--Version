@@ -116,6 +116,26 @@ elsif ( @got > 1 ) {
       "the --current option to specify the current version\n";
 }
 
+my $new_ver;
+if ( $set ) {
+    $new_ver = Perl::Version->new( $set );
+}
+elsif ( $bump ) {
+    $new_ver = Perl::Version->new( $current );
+    if ( $new_ver->is_alpha ) {
+        $new_ver->inc_alpha;
+    }
+    else {
+        my $pos = $new_ver->components;
+        $new_ver->increment( $pos - 1 );
+    }
+}
+
+if ( defined $new_ver ) {
+    set_versions( \%documents, $versions, $new_ver ) :;
+    save_all( \%documents );
+}
+
 sub version_re_perl {
     my $ver_re = shift;
 
@@ -140,6 +160,8 @@ sub set_versions {
     my $versions    = shift;
     my $new_version = shift
       or die "Internal: no version specified";
+
+    note( "Setting version to $new_version\n" );
 
     # Edit the documents
     for my $edits ( values %$versions ) {
