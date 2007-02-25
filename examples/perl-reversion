@@ -121,7 +121,7 @@ if ( $set ) {
     $new_ver = Perl::Version->new( $set );
 }
 elsif ( $bump ) {
-    $new_ver = Perl::Version->new( $current );
+    $new_ver = Perl::Version->new( $got[0] );
     if ( $new_ver->is_alpha ) {
         $new_ver->inc_alpha;
     }
@@ -132,7 +132,7 @@ elsif ( $bump ) {
 }
 
 if ( defined $new_ver ) {
-    set_versions( \%documents, $versions, $new_ver ) :;
+    set_versions( \%documents, $versions, $new_ver );
     save_all( \%documents );
 }
 
@@ -171,7 +171,7 @@ sub set_versions {
             $edit->{ver}->set( $new_version );
 
             $info->{lines}->[ $edit->{line} ]
-              = $edit->{pre} . $edit->{ver} . $edit->{post};
+              = $edit->{pre} . $edit->{ver} . $edit->{post} . "\n";
             $info->{dirty}++;
         }
     }
@@ -317,7 +317,7 @@ sub save_all {
 
     for my $doc ( grep { $docs->{$_}->{dirty} } keys %$docs ) {
         note( "Saving $doc\n" );
-        write_file( $doc, { atomic => 1 }, $docs->{doc}->{lines} );
+        write_file( $doc, { atomic => 1 }, $docs->{$doc}->{lines} );
     }
 }
 
