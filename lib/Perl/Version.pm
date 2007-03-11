@@ -5,7 +5,7 @@ use strict;
 use Carp;
 use Scalar::Util qw( blessed );
 
-use version; our $VERSION = qv( '0.0.5' );
+use version; our $VERSION = qv( '0.0.7' );
 
 use overload (
     '""'  => \&stringify,
@@ -23,7 +23,7 @@ my %NORMAL_FORMAT = (
     prefix => 'v',
     printf => ['%d'],
     extend => '.%d',
-    alpha  => '_%03d',
+    alpha  => '_%02d',
     suffix => '',
     fields => 3,
 );
@@ -32,7 +32,7 @@ my %NUMERIC_FORMAT = (
     prefix => '',
     printf => [ '%d', '.%03d' ],
     extend => '%03d',
-    alpha  => '_%03d',
+    alpha  => '_%02d',
     suffix => '',
     fields => 2,
 );
@@ -376,7 +376,7 @@ Perl::Version - Parse and manipulate Perl version strings
 
 =head1 VERSION
 
-This document describes Perl::Version version 0.0.5
+This document describes Perl::Version version 0.0.7
 
 =head1 SYNOPSIS
 

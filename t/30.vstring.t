@@ -6,7 +6,7 @@ use Perl::Version;
 use Test::More tests => 6;
 
 SKIP: {
-    skip 'cannot test bare v-strings with Perl < 5.8.1', 4
+    skip 'cannot test bare v-strings with Perl < 5.8.1', 6
       if $] < 5.008_001;
 
     my $ver = eval { Perl::Version->new( v1.2.3 ) };

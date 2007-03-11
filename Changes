@@ -11,3 +11,13 @@ Revision history for Perl-Version
 
 0.0.4   2007-02-24
         Doesn't check for vstrings on Perl < 5.8.1 now.
+
+0.0.5   2007-02-24
+        Added perl-reversion example / utility
+        
+0.0.6   2007-02-27
+        Fixed skip condition so vstring tests are properly skipped.
+
+0.0.7   2007-02-28
+        Alpha used to default to three digits, changed to two.
+        
