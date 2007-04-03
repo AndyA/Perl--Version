@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>MANIFEST.SKIP</string>
+	<string>examples/perl-reversion</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -28,7 +28,7 @@
 				<key>column</key>
 				<integer>0</integer>
 				<key>line</key>
-				<integer>10</integer>
+				<integer>25</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
@@ -121,6 +121,20 @@
 				<integer>18</integer>
 			</dict>
 		</dict>
+		<key>examples/perl-reversion</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>17</integer>
+				<key>line</key>
+				<integer>9</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
 		<key>lib/Perl/Version.pm</key>
 		<dict>
 			<key>caret</key>
@@ -128,12 +142,12 @@
 				<key>column</key>
 				<integer>0</integer>
 				<key>line</key>
-				<integer>5</integer>
+				<integer>362</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>0</integer>
+			<integer>329</integer>
 		</dict>
 		<key>t/00.load.t</key>
 		<dict>
@@ -225,16 +239,13 @@
 	<key>openDocuments</key>
 	<array>
 		<string>lib/Perl/Version.pm</string>
+		<string>examples/perl-reversion</string>
 		<string>Changes</string>
 		<string>MANIFEST.SKIP</string>
 		<string>andy/example-new.pl</string>
 		<string>t/30.vstring.t</string>
-		<string>t/05.misc.t</string>
-		<string>t/10.regression.t</string>
-		<string>t/20.compare.t</string>
 		<string>MANIFEST</string>
 		<string>andy/benchmark.pl</string>
-		<string>t/00.load.t</string>
 		<string>Makefile.PL</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>

@@ -5,7 +5,7 @@ use strict;
 use Carp;
 use Scalar::Util qw( blessed );
 
-use version; our $VERSION = qv( '0.0.7' );
+use version; our $VERSION = qv( '0.0.8' );
 
 use overload (
     '""'  => \&stringify,
@@ -376,7 +376,7 @@ Perl::Version - Parse and manipulate Perl version strings
 
 =head1 VERSION
 
-This document describes Perl::Version version 0.0.7
+This document describes Perl::Version version 0.0.8
 
 =head1 SYNOPSIS
 
@@ -732,7 +732,7 @@ suitable error. See L<DIAGNOSTICS> for more information.
 
 =item C<< component >>
 
-Set or set one of the components of a version.
+Set or get one of the components of a version.
 
     # Set the subversion
     $version->component( 2, 17 );
@@ -825,7 +825,7 @@ as will any alpha component.
 
 As an alternative to passing a component number one of the predefined
 component names 'revision', 'version', 'subversion' or 'alpha' may be
-passed. This is the only way to increment the alpha component.
+passed.
 
 =item C<< inc_alpha >>
 
