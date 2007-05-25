@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>examples/perl-reversion</string>
+	<string>lib/Perl/Version.pm</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -147,7 +147,7 @@
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>329</integer>
+			<integer>0</integer>
 		</dict>
 		<key>t/00.load.t</key>
 		<dict>
@@ -251,6 +251,6 @@
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{11, 48}, {1026, 777}}</string>
+	<string>{{155, 64}, {1062, 931}}</string>
 </dict>
 </plist>
