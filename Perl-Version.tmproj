@@ -142,12 +142,12 @@
 				<key>column</key>
 				<integer>0</integer>
 				<key>line</key>
-				<integer>362</integer>
+				<integer>388</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>0</integer>
+			<integer>268</integer>
 		</dict>
 		<key>t/00.load.t</key>
 		<dict>
@@ -251,6 +251,6 @@
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{155, 64}, {1062, 931}}</string>
+	<string>{{154, 79}, {1062, 931}}</string>
 </dict>
 </plist>
