@@ -69,6 +69,7 @@ my $bump    = 0;
 my $current = undef;
 my $set     = undef;
 my $normal  = undef;
+my $dryrun  = undef;
 
 GetOptions(
     'help|?'    => \$help,
@@ -77,6 +78,7 @@ GetOptions(
     'set=s'     => \$set,
     'bump'      => \$bump,
     'normal'    => \$normal,
+    'dryrun'    => \$dryrun,
 ) or pod2usage( 2 );
 
 pod2usage( 1 ) if $help;
@@ -327,8 +329,13 @@ sub save_all {
     my $docs = shift;
 
     for my $doc ( grep { $docs->{$_}->{dirty} } keys %$docs ) {
-        note( "Saving $doc\n" );
-        write_file( $doc, { atomic => 1 }, $docs->{$doc}->{lines} );
+        if ( $dryrun ) {
+            note( "Would save $doc\n" );
+        }
+        else {
+            note( "Saving $doc\n" );
+            write_file( $doc, { atomic => 1 }, $docs->{$doc}->{lines} );
+        }
     }
 }
 
@@ -446,6 +453,8 @@ perl-reversion [options] [file ...]
     -set <version>      set the project version number
     -current <version>  specify the current version
     -normal             normalise version strings
+    -dryrun             just go through the motions, but don't 
+                        actually save files
 
 =head1 DESCRIPTION
 
@@ -494,6 +503,11 @@ Update version strings to have the same formatting as the new
 version string provided with C<< -set >>. If this option is not
 specied perl-reversion will preserve the formatting of each
 individual version string.
+
+=item C<< -dryrun >>
+
+If set, perl-reversion will not save files. Use this to see
+what gets changed before it actually happens.
 
 =back
 

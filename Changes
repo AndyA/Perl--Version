@@ -23,3 +23,5 @@ Revision history for Perl-Version
         
 0.0.8   2007-03-29
         Documentation fixes
+        Added -dryrun option to perl-reversion [27649]. Thanks to DAXIM
+        for the patch.
