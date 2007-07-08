@@ -216,7 +216,6 @@ sub _format {
     $version .= sprintf( $format->{alpha}, $self->{alpha} )
       if defined $self->{alpha};
 
-    # And print result
     push @result, $version;
 
     return join( ' ', @result );
