@@ -5,7 +5,7 @@ use strict;
 use Carp;
 use Scalar::Util qw( blessed );
 
-use version; our $VERSION = qv( '0.0.8' );
+use version; our $VERSION = qv( '1.000' );
 
 use overload (
     '""'  => \&stringify,
@@ -132,21 +132,14 @@ sub _parse {
     if ( @parts == 1 && length( $parts[0] ) >= 3 ) {
 
         my $threes = pop @parts;
+        my @cluster = ( $threes =~ /(\d{1,3})/g );
 
-        if ( length( $threes ) % 3 ) {
-            carp "Decimal part not a multiple of three digits: $ver";
-            $threes .= '0' while length( $threes ) % 3;
-        }
-
-        # Trim trailing
-        # $threes =~ s/ (?: 000 ) + $//x;
-
-        push @parts, ( $threes =~ m{ (\d\d\d) }xg );
-
-        # 5.008006 style
-        push @fmt, ( '%03d' ) x int( length( $threes ) / 3 );
+        # warn "# $threes <", join( '>, <', @cluster ), ">\n";
+        push @fmt, map { $self->_guess_num_format( $_ ) } @cluster;
         $fmt[1] = '.' . $fmt[1];
         $format->{extend} = '%03d';
+
+        push @parts, map { 0 + $_ } @cluster;
     }
     else {
 
@@ -209,7 +202,8 @@ sub _format {
     pop @fmt while @fmt > @parts;
     push @fmt, $format->{extend} while @parts > @fmt;
 
-    my $version = ( $format->{prefix} )
+    my $version
+      = ( $format->{prefix} )
       . sprintf( join( '', @fmt ), @parts )
       . ( $format->{suffix} );
 
@@ -375,7 +369,7 @@ Perl::Version - Parse and manipulate Perl version strings
 
 =head1 VERSION
 
-This document describes Perl::Version version 0.0.8
+This document describes Perl::Version version 1.000
 
 =head1 SYNOPSIS
 

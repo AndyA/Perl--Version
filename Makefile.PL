@@ -3,7 +3,6 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 eval 'use ExtUtils::MakeMaker::Coverage';
-warn "Optional ExtUtils::MakeMaker::Coverage not available\n" if $@;
 
 my %EXE = (
     'perl-reversion' => {

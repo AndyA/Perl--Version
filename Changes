@@ -25,3 +25,8 @@ Revision history for Perl-Version
         Documentation fixes
         Added -dryrun option to perl-reversion [27649]. Thanks to DAXIM
         for the patch.
+
+1.000   2007-09-03
+        Removed warning about long version numbers not having a mulitple
+        of three digits. Perl 5.00504 doesn't have a multiple of three
+        digits and it shouldn't be discriminated against.
