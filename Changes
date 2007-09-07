@@ -33,3 +33,6 @@ Revision history for Perl-Version
 
 1.001   2007-09-07
         Added META.yml to perl-reversion's list of target files.
+        
+1.002   2007-09-07
+        Improved META.yml handling. So now it, er, works.
