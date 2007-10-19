@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>examples/perl-reversion</string>
+	<string>andy/fifth.pl</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -135,6 +135,20 @@
 				<integer>18</integer>
 			</dict>
 		</dict>
+		<key>andy/fifth.pl</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>11</integer>
+				<key>line</key>
+				<integer>7</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
 		<key>andy/v5.pl</key>
 		<dict>
 			<key>caret</key>
@@ -161,7 +175,7 @@
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>0</integer>
+			<integer>176</integer>
 		</dict>
 		<key>lib/Perl/Version.pm</key>
 		<dict>
@@ -170,12 +184,12 @@
 				<key>column</key>
 				<integer>0</integer>
 				<key>line</key>
-				<integer>0</integer>
+				<integer>350</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>267</integer>
+			<integer>415</integer>
 		</dict>
 		<key>t/00.load.t</key>
 		<dict>
@@ -205,7 +219,7 @@
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>36</integer>
+			<integer>0</integer>
 			<key>selectFrom</key>
 			<dict>
 				<key>column</key>
@@ -228,12 +242,12 @@
 				<key>column</key>
 				<integer>0</integer>
 				<key>line</key>
-				<integer>0</integer>
+				<integer>713</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>0</integer>
+			<integer>667</integer>
 		</dict>
 		<key>t/20.compare.t</key>
 		<dict>
@@ -267,6 +281,9 @@
 	<key>openDocuments</key>
 	<array>
 		<string>lib/Perl/Version.pm</string>
+		<string>andy/fifth.pl</string>
+		<string>t/05.misc.t</string>
+		<string>t/10.regression.t</string>
 		<string>examples/perl-reversion</string>
 		<string>Changes</string>
 		<string>README</string>
@@ -276,6 +293,6 @@
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{262, 73}, {992, 941}}</string>
+	<string>{{232, 50}, {948, 823}}</string>
 </dict>
 </plist>

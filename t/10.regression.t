@@ -687,6 +687,38 @@ BEGIN {
             numify      => '1.003000',
         },
         {
+            name    => 'Numeric, inc_version',
+            new_arg => '0.09',
+            action  => sub {
+                $_->inc_version;
+            },
+            components  => 2,
+            component_0 => 0,
+            component_1 => 10,
+            component_2 => undef,
+            component_3 => undef,
+            alpha       => 0,
+            stringify   => '0.10',
+            normal      => 'v0.10.0',
+            numify      => '0.010',
+        },
+        {
+            name    => 'Numeric, inc_version (2)',
+            new_arg => '0.19',
+            action  => sub {
+                $_->inc_version;
+            },
+            components  => 2,
+            component_0 => 0,
+            component_1 => 20,
+            component_2 => undef,
+            component_3 => undef,
+            alpha       => 0,
+            stringify   => '0.20',
+            normal      => 'v0.20.0',
+            numify      => '0.020',
+        },
+        {
             name    => 'Three components, inc_subversion',
             new_arg => '1.2.3',
             action  => sub {
