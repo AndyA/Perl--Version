@@ -5,7 +5,7 @@ use strict;
 use Carp;
 use Scalar::Util qw( blessed );
 
-use version; our $VERSION = qv( '1.002' );
+our $VERSION = '1.004';
 
 use overload (
     '""'  => \&stringify,
@@ -177,10 +177,6 @@ sub _parse {
     $self->{format} = $format;
 
     push @ver, map { $_ + 0 } @parts;
-
-    if ( grep { $_ > 999 } @ver ) {
-        carp "Version has component > 999: $version";
-    }
 
     $self->{version} = \@ver;
 
@@ -369,7 +365,7 @@ Perl::Version - Parse and manipulate Perl version strings
 
 =head1 VERSION
 
-This document describes Perl::Version version 1.002
+This document describes Perl::Version version 1.004
 
 =head1 SYNOPSIS
 
@@ -1037,28 +1033,6 @@ specified a component that doesn't exist within the version:
 Slightly confusingly you'll see this message even if you specified the
 component number implicitly by using one of the named convenience
 accessors.
-
-=back
-
-=head2 Warnings
-
-=over
-
-=item C<< Decimal part not a multiple of three digits: %s >>
-
-When Perl::Version sees a version number like
-
-    1.002003
-
-it splits the tail of the version so that each group of three digits
-specifies the value of a component. If you pass a version string with,
-say, five digits after the decimal point you'll see this warning.
-
-=item C<< Version has component > 999: %s >>
-
-You passed a version like this:
-
-    1.1000.0
 
 =back
 
