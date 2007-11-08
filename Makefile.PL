@@ -24,7 +24,6 @@ my %ARGS = (
     PL_FILES      => {},
     PREREQ_PM     => {
         'Test::More'   => 0,
-        'version'      => 0,
         'Scalar::Util' => 0,
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
