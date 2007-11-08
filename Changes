@@ -36,3 +36,6 @@ Revision history for Perl-Version
         
 1.002   2007-09-07
         Improved META.yml handling. So now it, er, works.
+
+1.003   2007-11-08
+        Removed version.pm dependency.
