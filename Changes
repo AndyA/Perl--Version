@@ -39,3 +39,6 @@ Revision history for Perl-Version
 
 1.003   2007-11-08
         Removed version.pm dependency.
+        
+1.004   2007-11-08
+        Removed '> 999' warning.
