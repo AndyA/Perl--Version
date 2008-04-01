@@ -71,21 +71,45 @@ my @MAGIC = (
     }
 );
 
-my $man     = 0;
-my $help    = 0;
-my $bump    = 0;
-my $current = undef;
-my $set     = undef;
-my $normal  = undef;
-my $dryrun  = undef;
+my $man      = 0;
+my $help     = 0;
+my $bump     = undef;
+my $current  = undef;
+my $set      = undef;
+my $dryrun   = undef;
+my $force_to = undef;
+
+my %BUMP = (
+    bump              => 'auto', # original -bump behavior
+    'bump-revision'   => 0,
+    'bump-version'    => 1,
+    'bump-subversion' => 2,
+    'bump-alpha'      => 3,
+);
 
 GetOptions(
     'help|?'    => \$help,
     'man'       => \$man,
     'current=s' => \$current,
     'set=s'     => \$set,
-    'bump'      => \$bump,
-    'normal'    => \$normal,
+    (map {
+        my $opt = $_;
+        $_ => sub {
+            if ( defined $bump ) {
+                die "Please specify only one -bump option\n"
+            }
+            $bump = $BUMP{$opt}
+        }
+    } keys %BUMP),
+    (map {
+        my $opt = $_;
+        $_ => sub {
+            if ( defined $force_to ) {
+                die "Please specify only one of -normal, -numify, or -stringify\n"
+            }
+            $force_to = $opt
+        }
+    } qw(normal numify stringify)),
     'dryrun'    => \$dryrun,
 ) or pod2usage( 2 );
 
@@ -126,26 +150,32 @@ elsif ( @got > 1 ) {
       "the --current option to specify the current version\n";
 }
 
-my $new_ver;
-if ( $set ) {
-    $new_ver = Perl::Version->new( $set );
-}
-elsif ( $bump ) {
-    $new_ver = Perl::Version->new( $got[0] );
-    if ( $new_ver->is_alpha ) {
-        $new_ver->inc_alpha;
+    my $new_ver;
+    if ( $set ) {
+        $new_ver = Perl::Version->new( $set );
     }
-    else {
-        my $pos = $new_ver->components;
-        $new_ver->increment( $pos - 1 );
+    elsif ( defined $bump ) {
+        $new_ver = Perl::Version->new( $got[0] );
+        if ( $bump eq 'auto' ) {
+            if ( $new_ver->is_alpha ) {
+                $new_ver->inc_alpha;
+            }
+            else {
+                my $pos = $new_ver->components;
+                $new_ver->increment( $pos - 1 );
+            }
+        } else {
+            $new_ver->increment( $bump );
+        }
     }
-}
 else {
-    note( "Current project version is $got[0]\n" );
+    my $current_ver = $versions->{$got[0]}->[0]->{ver};
+    $current_ver = $current_ver->$force_to if $force_to;
+    note( "Current project version is $current_ver\n" );
 }
 
 if ( defined $new_ver ) {
-    set_versions( \%documents, $versions, $new_ver, $normal );
+    set_versions( \%documents, $versions, $new_ver, $force_to );
     save_all( \%documents );
 }
 
@@ -178,7 +208,11 @@ sub set_versions {
     my $versions    = shift;
     my $new_version = shift
       or die "Internal: no version specified";
-    my $normal = shift;
+    my $force_to = shift;
+
+    if ( $force_to ) {
+        $new_version = Perl::Version->new( $new_version->$force_to );
+    }
 
     note( "Setting version to $new_version\n" );
 
@@ -187,7 +221,7 @@ sub set_versions {
         for my $edit ( @$edits ) {
             my $info = $edit->{info};
 
-            if ( $normal ) {
+            if ( $force_to ) {
                 $edit->{ver} = $new_version;
             }
             else {
@@ -473,9 +507,19 @@ perl-reversion [options] [file ...]
     -help               see this summary
     -man                view man page for perl-reversion
     -bump               make the smallest possible increment
+
+    -bump-revision      increment the specified version component
+    -bump-version
+    -bump-subversion
+    -bump-alpha
+
     -set <version>      set the project version number
     -current <version>  specify the current version
-    -normal             normalise version strings
+
+    -normal             print current version in a specific format OR
+    -numify             force versions to be a specific format,
+    -stringify          with -set or -bump
+
     -dryrun             just go through the motions, but don't 
                         actually save files
 
@@ -509,6 +553,18 @@ least significant part of the version string is incremented.
     1.1.1   =>  1.1.2
     1.1.1_1 =>  1.1.1_2
 
+=item C<< -bump-revision >>
+
+=item C<< -bump-version >>
+
+=item C<< -bump-subversion >>
+
+=item C<< -bump-alpha >>
+
+Increment the specified version component.  Like the C<inc_*> methods of
+L<Perl::Version>, incrementing a component sets all components to the right of
+it to zero.
+
 =item C<< -set <version> >>
 
 Set the version to the specified value. Unless the C<-normal> option is
@@ -522,10 +578,18 @@ be updated.
 
 =item C<< -normal >>
 
-Update version strings to have the same formatting as the new
-version string provided with C<< -set >>. If this option is not
-specied perl-reversion will preserve the formatting of each
-individual version string.
+=item C<< -numify >>
+
+=item C<< -stringify >>
+
+Use a specific formatting, as in L<Perl::Version/Formatting>.
+
+Alone, these options control how the current (found) version is displayed.
+
+With C<-bump> or C<-set>, also update version strings to have the given
+formatting, regardless of the version format passed to C<-set> or the current
+version (for C<-bump>).  If none of these options are specified, perl-reversion
+will preserve the formatting of each individual version string.
 
 =item C<< -dryrun >>
 
