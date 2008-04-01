@@ -80,7 +80,7 @@ my $dryrun   = undef;
 my $force_to = undef;
 
 my %BUMP = (
-    bump              => 'auto', # original -bump behavior
+    bump              => 'auto',    # original -bump behavior
     'bump-revision'   => 0,
     'bump-version'    => 1,
     'bump-subversion' => 2,
@@ -92,25 +92,30 @@ GetOptions(
     'man'       => \$man,
     'current=s' => \$current,
     'set=s'     => \$set,
-    (map {
-        my $opt = $_;
-        $_ => sub {
-            if ( defined $bump ) {
-                die "Please specify only one -bump option\n"
-            }
-            $bump = $BUMP{$opt}
-        }
-    } keys %BUMP),
-    (map {
-        my $opt = $_;
-        $_ => sub {
-            if ( defined $force_to ) {
-                die "Please specify only one of -normal, -numify, or -stringify\n"
-            }
-            $force_to = $opt
-        }
-    } qw(normal numify stringify)),
-    'dryrun'    => \$dryrun,
+    (
+        map {
+            my $opt = $_;
+            $_ => sub {
+                if ( defined $bump ) {
+                    die "Please specify only one -bump option\n";
+                }
+                $bump = $BUMP{$opt};
+              }
+          } keys %BUMP
+    ),
+    (
+        map {
+            my $opt = $_;
+            $_ => sub {
+                if ( defined $force_to ) {
+                    die
+                      "Please specify only one of -normal, -numify, or -stringify\n";
+                }
+                $force_to = $opt;
+              }
+          } qw(normal numify stringify)
+    ),
+    'dryrun' => \$dryrun,
 ) or pod2usage( 2 );
 
 pod2usage( 1 ) if $help;
@@ -132,7 +137,8 @@ if ( my @missing = grep { !-e $_ } @files ) {
 my %documents = map { $_ => {} } @files;
 load_all( \%documents );
 
-if ( my @bad_type = grep { !defined $documents{$_}->{type} } keys %documents ) {
+if ( my @bad_type
+    = grep { !defined $documents{$_}->{type} } keys %documents ) {
     die "Can't process ", conjunction_list( 'or', @bad_type ), "\n",
       "I can only process text files\n";
 }
@@ -146,30 +152,32 @@ if ( @got == 0 ) {
       : "any version strings\n";
 }
 elsif ( @got > 1 ) {
-    die "Found versions ", conjunction_list( 'and', @got ), ". Please use\n",
+    die "Found versions ", conjunction_list( 'and', @got ),
+      ". Please use\n",
       "the --current option to specify the current version\n";
 }
 
-    my $new_ver;
-    if ( $set ) {
-        $new_ver = Perl::Version->new( $set );
-    }
-    elsif ( defined $bump ) {
-        $new_ver = Perl::Version->new( $got[0] );
-        if ( $bump eq 'auto' ) {
-            if ( $new_ver->is_alpha ) {
-                $new_ver->inc_alpha;
-            }
-            else {
-                my $pos = $new_ver->components;
-                $new_ver->increment( $pos - 1 );
-            }
-        } else {
-            $new_ver->increment( $bump );
+my $new_ver;
+if ( $set ) {
+    $new_ver = Perl::Version->new( $set );
+}
+elsif ( defined $bump ) {
+    $new_ver = Perl::Version->new( $got[0] );
+    if ( $bump eq 'auto' ) {
+        if ( $new_ver->is_alpha ) {
+            $new_ver->inc_alpha;
+        }
+        else {
+            my $pos = $new_ver->components;
+            $new_ver->increment( $pos - 1 );
         }
     }
+    else {
+        $new_ver->increment( $bump );
+    }
+}
 else {
-    my $current_ver = $versions->{$got[0]}->[0]->{ver};
+    my $current_ver = $versions->{ $got[0] }->[0]->{ver};
     $current_ver = $current_ver->$force_to if $force_to;
     note( "Current project version is $current_ver\n" );
 }
@@ -182,7 +190,8 @@ if ( defined $new_ver ) {
 sub version_re_perl {
     my $ver_re = shift;
 
-    return qr{ ^ ( .*?  [\$\*] (?: \w+ (?: :: | ' ) )* VERSION \s* = \D* ) 
+    return
+      qr{ ^ ( .*?  [\$\*] (?: \w+ (?: :: | ' ) )* VERSION \s* = \D* ) 
                  $ver_re 
                  ( .* ) $ }x;
 }
@@ -313,7 +322,8 @@ sub find_versions {
         note( "Scanning $name" );
 
         my $machine = $machines{ $info->{type} }
-          or die "Internal: can't find state machine for type ", $info->{type};
+          or die "Internal: can't find state machine for type ",
+          $info->{type};
 
         my $state = $machine->{init};
         my $lines = $info->{lines};
@@ -329,7 +339,8 @@ sub find_versions {
                 for my $trans ( @$state ) {
                     if ( $line =~ $trans->{re} ) {
                         if ( $trans->{mark} ) {
-                            my $ver = Perl::Version->new( $2 . $3 . $4 );
+                            my $ver
+                              = Perl::Version->new( $2 . $3 . $4 );
                             push @{ $ver_found->{ $ver->normal } },
                               {
                                 file => $name,
@@ -410,7 +421,8 @@ sub find_proj_files {
             }
         }
         unless ( @files ) {
-            die "I looked at ", conjunction_list( 'and', sort keys %CONSIDER ),
+            die "I looked at ",
+              conjunction_list( 'and', sort keys %CONSIDER ),
               " but found no files to process\n";
         }
         return @files;
@@ -439,7 +451,8 @@ sub expand_dirs_matching {
     my @out   = ();
     while ( my $obj = shift @work ) {
         if ( -d $obj ) {
-            opendir my $dh, $obj or die "Can't read directory $obj ($!)\n";
+            opendir my $dh, $obj
+              or die "Can't read directory $obj ($!)\n";
             push @work, map { File::Spec->catdir( $obj, $_ ) }
               grep { $_ !~ $SKIP }
               grep { $_ !~ /^[.][.]?$/ } readdir $dh;
