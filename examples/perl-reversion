@@ -152,9 +152,10 @@ if ( @got == 0 ) {
       : "any version strings\n";
 }
 elsif ( @got > 1 ) {
-    die "Found versions ", conjunction_list( 'and', @got ),
-      ". Please use\n",
-      "the --current option to specify the current version\n";
+    die "Found versions ",
+        conjunction_list( 'and', map { "$versions->{$_}->[0]->{ver}" } @got ),
+        ". Please use\n",
+        "the --current option to specify the current version\n";
 }
 
 my $new_ver;
