@@ -252,9 +252,10 @@ sub find_versions {
     my $docs    = shift;
     my $version = shift;
 
-    my $ver_re = defined $version
-      ? '()(' . quotemeta( $version ) . ')()'    # Three captures
-      : Perl::Version::REGEX;
+#    my $ver_re = defined $version
+#      ? '()(' . quotemeta( $version ) . ')()'    # Three captures
+#      : Perl::Version::REGEX;
+    my $ver_re = Perl::Version::REGEX;
 
     my %machines = (
 
@@ -345,6 +346,7 @@ sub find_versions {
                         if ( $trans->{mark} ) {
                             my $ver
                               = Perl::Version->new( $2 . $3 . $4 );
+                            next if defined $version and "$version" ne "$ver";
                             push @{ $ver_found->{ $ver->normal } },
                               {
                                 file => $name,
