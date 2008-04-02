@@ -73,6 +73,7 @@ my @MAGIC = (
 
 my $man      = 0;
 my $help     = 0;
+my $quiet    = 0;
 my $bump     = undef;
 my $current  = undef;
 my $set      = undef;
@@ -116,6 +117,7 @@ GetOptions(
           } qw(normal numify stringify)
     ),
     'dryrun' => \$dryrun,
+    'quiet'  => \$quiet,
 ) or pod2usage( 2 );
 
 pod2usage( 1 ) if $help;
@@ -409,7 +411,7 @@ sub save_all {
 }
 
 sub note {
-    print join( '', @_ );
+    print join( '', @_ ) unless $quiet;
 }
 
 sub find_proj_files {
