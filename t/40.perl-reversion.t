@@ -22,9 +22,9 @@ my $dir = File::Temp::tempdir(CLEANUP => 1);
 
 sub find {
     my $cmd = "$RUN @_";
-    diag $cmd;
+    #diag $cmd;
     my $output = `$cmd`;
-    diag $output;
+    #diag $output;
     if ($output =~ /version is (\S+)$/) {
         return { found => $1 };
     }
