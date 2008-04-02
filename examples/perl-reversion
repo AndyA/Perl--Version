@@ -11,6 +11,7 @@ use Getopt::Long;
 use Pod::Usage;
 use File::Spec;
 use File::Slurp;
+use File::Basename;
 
 # Files that suggest that we have a project directory. The scores next
 # to each are summed for each candidate directory. The first directory
@@ -59,7 +60,7 @@ my @MAGIC = (
         name => 'meta',
         test => sub {
             my ( $name, $info ) = @_;
-            return $name eq 'META.yml';
+            return basename($name) eq 'META.yml';
         },
     },
     {
