@@ -42,3 +42,12 @@ Revision history for Perl-Version
         
 1.004   2007-11-08
         Removed '> 999' warning.
+
+1.005   2008-04-03
+        Fixes for perl-reversion:
+        * Allow any of the version formats as options for displaying or
+          setting/bumping the version.
+        * Display current version in the format found rather than as though
+          -normal had been used.
+        * Allow more specific -bump-<component> options.
+        * Using -current=1.2 no longer matches 1.2.3 in some cases
