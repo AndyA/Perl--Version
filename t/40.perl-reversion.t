@@ -23,7 +23,16 @@ my $dir = File::Temp::tempdir(CLEANUP => 1);
 sub find {
     my $cmd = "$RUN @_";
     #diag $cmd;
-    my $output = `$cmd`;
+    my $output;
+    my $pid = open my $fh, '-|';
+    die "Could not open pipe: $!" unless defined $pid;
+    if ($pid) {
+      $output = join '', <$fh>;
+    } else {
+      close *STDERR;
+      exec $cmd;
+    }
+    
     #diag $output;
     if ($output =~ /version is (\S+)$/) {
         return { found => $1 };
