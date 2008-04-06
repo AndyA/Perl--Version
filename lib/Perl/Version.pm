@@ -1059,6 +1059,7 @@ L<http://rt.cpan.org>.
 =head1 AUTHOR
 
 Andy Armstrong C<< <andy@hexten.net> >>
+Hans Dieter Pearcey C<< <hdp@cpan.org> >>
 
 =head1 LICENCE AND COPYRIGHT
 
