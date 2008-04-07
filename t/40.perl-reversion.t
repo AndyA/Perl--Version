@@ -16,7 +16,7 @@ my $RUN = "$^X $libs examples/perl-reversion";
 if (system("$RUN -quiet")) {
     plan skip_all => 'cannot run perl-reversion, skipping its tests';
 }
-plan tests => 16;
+plan tests => 20;
 
 my $dir = File::Temp::tempdir(CLEANUP => 1);
 
@@ -82,6 +82,22 @@ with_file(
 ---
 bar: 2
 version: 1.2.3
+meta-spec:
+  url: whatever
+  version: 1.3
+END
+    sub { runtests(META => '1.2.3') },
+);
+
+# weirdly indented but still valid
+with_file(
+    "META.yml", <<'END',
+---
+   bar: 2
+   version: 1.2.3
+   meta-spec:
+     url: whatever
+     version: 1.3
 END
     sub { runtests(META => '1.2.3') },
 );
