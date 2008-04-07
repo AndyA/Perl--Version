@@ -166,7 +166,7 @@ if ( $set ) {
     $new_ver = Perl::Version->new( $set );
 }
 elsif ( defined $bump ) {
-    $new_ver = Perl::Version->new( $got[0] );
+    $new_ver = $versions->{ $got[0] }->[0]->{ver};
     if ( $bump eq 'auto' ) {
         if ( $new_ver->is_alpha ) {
             $new_ver->inc_alpha;
