@@ -62,3 +62,9 @@ Revision history for Perl-Version
           (it was acting as though -normal had been specified)
         * noted that -stringify is the effective default for -bump/-set, so
           those options more accurately report the new version
+
+1.007   2008-04-07
+        Fix for perl-reversion:
+        * try to only find top-level keys in META.yml; this means we will stop
+          catching the version from meta-spec and (hopefully) only catch the
+          dist's version.
