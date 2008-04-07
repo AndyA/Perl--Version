@@ -51,3 +51,14 @@ Revision history for Perl-Version
           -normal had been used.
         * Allow more specific -bump-<component> options.
         * Using -current=1.2 no longer matches 1.2.3 in some cases
+
+1.006   2008-04-07
+        Major fix for perl-reversion:
+        * -bump now properly maintains the number of version components;
+          previously, it was treating every version as though it had at least 3
+          components, so e.g. 1.1 was being wrongly bumped to 1.1.1
+        Other fixes for perl-reversion:
+        * -bump -stringify will now properly keep the original version format
+          (it was acting as though -normal had been specified)
+        * noted that -stringify is the effective default for -bump/-set, so
+          those options more accurately report the new version
