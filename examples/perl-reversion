@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+# vim: ts=4 sts=4 sw=4:
 #
 #  perl-reversion
 #
@@ -172,11 +173,24 @@ elsif ( defined $bump ) {
             $new_ver->inc_alpha;
         }
         else {
-            my $pos = $new_ver->components;
-            $new_ver->increment( $pos - 1 );
+            my $pos = $new_ver->components - 1;
+            $new_ver->increment( $pos );
         }
     }
     else {
+        my $pos = $new_ver->components - 1;
+        if ( $bump > $pos ) {
+            my %NAME = (
+                0 => 'revision',
+                1 => 'version',
+                2 => 'subversion',
+                3 => 'alpha',
+            );
+            my $name = $NAME{$bump};
+            die "Cannot -bump-$name -- version $new_ver does not have " .
+                "'$name' component.\n" .
+                "Use -set if you intended to add it.\n";
+        }
         $new_ver->increment( $bump );
     }
 }
