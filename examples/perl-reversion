@@ -226,8 +226,8 @@ sub version_re_plain {
 }
 
 sub version_re_meta {
-    my $ver_re = shift;
-    return qr{ ^ ( \s* version: \s* ) $ver_re ( \s* ) $ }x;
+    my ($indent, $ver_re) = @_;
+    return qr{ ^ ( $indent version: \s* ) $ver_re ( \s* ) $ }x;
 }
 
 sub set_versions {
@@ -328,9 +328,21 @@ sub find_versions {
         meta => {
             init => [
                 {
-                    re   => version_re_meta( $ver_re ),
-                    mark => 1,
-                }
+                    re   => qr{^ (\s*) (?! ---) }x,
+                    goto => 'version',
+                    exec => sub {
+                        my ($machine, $matches, $line) = @_;
+                        $machine->{version} = [
+                            {
+                                re => version_re_meta(
+                                    '\s{' . length($matches->[0]) . '}',
+                                    $ver_re
+                                ),
+                                mark => 1,
+                            },
+                        ];
+                    },
+                },
             ],
         },
     );
@@ -356,7 +368,7 @@ sub find_versions {
 
             STATE: {
                 for my $trans ( @$state ) {
-                    if ( $line =~ $trans->{re} ) {
+                    if ( my @match = $line =~ $trans->{re} ) {
                         if ( $trans->{mark} ) {
                             my $ver
                               = Perl::Version->new( $2 . $3 . $4 );
@@ -371,6 +383,10 @@ sub find_versions {
                                 post => $5
                               };
                             note( " $ver" );
+                        }
+
+                        if ( my $code = $trans->{exec} ) {
+                            $code->( $machine, \@match, $line );
                         }
 
                         if ( my $goto = $trans->{goto} ) {
