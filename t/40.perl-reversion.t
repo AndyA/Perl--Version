@@ -16,11 +16,11 @@ my $RUN = "$^X $libs examples/perl-reversion";
 if (system("$RUN -quiet")) {
     plan skip_all => 'cannot run perl-reversion, skipping its tests';
 }
-plan tests => 8;
+plan tests => 12;
 
 my $dir = File::Temp::tempdir(CLEANUP => 1);
 
-sub find {
+sub _run {
     my $cmd = "$RUN @_";
     #diag $cmd;
     my $output;
@@ -52,8 +52,15 @@ sub with_file {
 
 sub runtests {
     my ($name, $version) = @_;
-    is_deeply( find($dir), { found => '1.2.3' }, "found in $name" );
-    is_deeply( find($dir, "-current=1.2"), {}, "partial does not match" );
+    is_deeply( _run($dir), { found => '1.2.3' }, "found in $name" );
+    is_deeply( _run($dir, "-current=1.2"), {}, "partial does not match" );
+    _run($dir, '-set', '1.2');
+    _run($dir, '-bump');
+    is_deeply(
+      _run($dir), { found => '1.3', },
+      "-bump did not extend version"
+    );
+
 }
 
 FileHandle->new("> $dir/Makefile.PL");
