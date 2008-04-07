@@ -607,8 +607,10 @@ Alone, these options control how the current (found) version is displayed.
 
 With C<-bump> or C<-set>, also update version strings to have the given
 formatting, regardless of the version format passed to C<-set> or the current
-version (for C<-bump>).  If none of these options are specified, perl-reversion
-will preserve the formatting of each individual version string.
+version (for C<-bump>).
+
+If none of these options are specified, perl-reversion will preserve the
+formatting of each individual version string (the same as C<-stringify>).
 
 =item C<< -dryrun >>
 
