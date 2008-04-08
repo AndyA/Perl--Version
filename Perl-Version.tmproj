@@ -135,20 +135,6 @@
 				<integer>18</integer>
 			</dict>
 		</dict>
-		<key>andy/fifth.pl</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>11</integer>
-				<key>line</key>
-				<integer>7</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
-		</dict>
 		<key>andy/v5.pl</key>
 		<dict>
 			<key>caret</key>
@@ -184,12 +170,12 @@
 				<key>column</key>
 				<integer>0</integer>
 				<key>line</key>
-				<integer>350</integer>
+				<integer>1062</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>0</integer>
+			<integer>1040</integer>
 		</dict>
 		<key>t/00.load.t</key>
 		<dict>
@@ -281,7 +267,6 @@
 	<key>openDocuments</key>
 	<array>
 		<string>lib/Perl/Version.pm</string>
-		<string>andy/fifth.pl</string>
 		<string>t/05.misc.t</string>
 		<string>t/10.regression.t</string>
 		<string>examples/perl-reversion</string>
