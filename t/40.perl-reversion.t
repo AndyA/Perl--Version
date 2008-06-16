@@ -8,23 +8,28 @@ use File::Path qw(mkpath);
 use File::Spec;
 use FileHandle;
 
+if ( $^O =~ /MSWin32/ ) {
+    plan skip_all => 'cannot run on Windows';
+}
+
 # -Mblib makes a lot of noise
 my $libs = join " ",
-    map { '-I' . File::Spec->catfile('blib', $_) } qw(lib arch);
+  map { '-I' . File::Spec->catfile( 'blib', $_ ) } qw(lib arch);
 my $RUN = "$^X $libs examples/perl-reversion";
 
-if (system("$RUN -quiet")) {
+if ( system( "$RUN -quiet" ) ) {
     plan skip_all => 'cannot run perl-reversion, skipping its tests';
 }
 plan tests => 20;
 
-my $dir = File::Temp::tempdir(CLEANUP => 1);
+my $dir = File::Temp::tempdir( CLEANUP => 1 );
 
 sub find {
-    my $rv = _run(@_);
-    if ($rv->{output} =~ /version is (\S+)$/) {
+    my $rv = _run( @_ );
+    if ( $rv->{output} =~ /version is (\S+)$/ ) {
         return { found => $1 };
-    } else {
+    }
+    else {
         return {};
     }
 }
@@ -35,21 +40,22 @@ sub _run {
     my $output;
     my $pid = open my $fh, '-|';
     die "Could not open pipe: $!" unless defined $pid;
-    if ($pid) {
-      $output = join '', <$fh>;
-    } else {
-      close *STDERR;
-      exec $cmd;
+    if ( $pid ) {
+        $output = join '', <$fh>;
     }
-    
+    else {
+        close *STDERR;
+        exec $cmd;
+    }
+
     #diag $output;
     return { output => $output };
 }
 
 sub with_file {
-    my ($name, $content, $code) = @_;
-    my $fh = FileHandle->new("> $dir/$name")
-        or die "Can't open $dir/$name: $!";
+    my ( $name, $content, $code ) = @_;
+    my $fh = FileHandle->new( "> $dir/$name" )
+      or die "Can't open $dir/$name: $!";
     print $fh $content;
     close $fh;
     $code->();
@@ -57,16 +63,18 @@ sub with_file {
 }
 
 sub runtests {
-    my ($name, $version) = @_;
-    is_deeply( find($dir), { found => '1.2.3' }, "found in $name" );
-    is_deeply( find($dir, "-current=1.2"), {}, "partial does not match" );
-    _run($dir, '-set', '1.2');
-    _run($dir, '-bump');
+    my ( $name, $version ) = @_;
+    is_deeply( find( $dir ), { found => '1.2.3' }, "found in $name" );
+    is_deeply( find( $dir, "-current=1.2" ),
+        {}, "partial does not match" );
+    _run( $dir, '-set', '1.2' );
+    _run( $dir, '-bump' );
     is_deeply(
-      find($dir), { found => '1.3', },
-      "-bump did not extend version"
+        find( $dir ),
+        { found => '1.3', },
+        "-bump did not extend version"
     );
-    my $rv = _run($dir, '-bump-subversion', '2>&1');
+    my $rv = _run( $dir, '-bump-subversion', '2>&1' );
     like(
         $rv->{output},
         qr/version 1\.3 does not have 'subversion' component/,
@@ -74,8 +82,8 @@ sub runtests {
     );
 }
 
-FileHandle->new("> $dir/Makefile.PL");
-mkpath("$dir/lib");
+FileHandle->new( "> $dir/Makefile.PL" );
+mkpath( "$dir/lib" );
 
 with_file(
     "META.yml", <<'END',
@@ -86,7 +94,7 @@ meta-spec:
   url: whatever
   version: 1.3
 END
-    sub { runtests(META => '1.2.3') },
+    sub { runtests( META => '1.2.3' ) },
 );
 
 # weirdly indented but still valid
@@ -99,7 +107,7 @@ with_file(
      url: whatever
      version: 1.3
 END
-    sub { runtests(META => '1.2.3') },
+    sub { runtests( META => '1.2.3' ) },
 );
 
 with_file(
@@ -110,7 +118,7 @@ Version 1.2.3
 
 =cut
 END
-    sub { runtests(pod => "1.2.3") },
+    sub { runtests( pod => "1.2.3" ) },
 );
 
 with_file(
@@ -119,12 +127,12 @@ package Foo;
 our $VERSION = '1.2.3';
 1;
 END
-    sub { runtests(pm => "1.2.3") },
+    sub { runtests( pm => "1.2.3" ) },
 );
 
 with_file(
     README => <<'END',
 This README describes version 1.2.3 of Flurble.
 END
-    sub { runtests(plain => "1.2.3") },
+    sub { runtests( plain => "1.2.3" ) },
 );
