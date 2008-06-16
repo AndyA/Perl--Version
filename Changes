@@ -68,3 +68,7 @@ Revision history for Perl-Version
         * try to only find top-level keys in META.yml; this means we will stop
           catching the version from meta-spec and (hopefully) only catch the
           dist's version.
+
+1.008   2008-06-16
+        Skip perl-reversion tests on Windows. They need fork.
+
