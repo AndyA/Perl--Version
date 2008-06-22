@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>lib/Perl/Version.pm</string>
+	<string>t/40.perl-reversion.t</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -175,7 +175,7 @@
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>1040</integer>
+			<integer>1037</integer>
 		</dict>
 		<key>t/00.load.t</key>
 		<dict>
@@ -263,10 +263,25 @@
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
+		<key>t/40.perl-reversion.t</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
 	</dict>
 	<key>openDocuments</key>
 	<array>
 		<string>lib/Perl/Version.pm</string>
+		<string>t/40.perl-reversion.t</string>
 		<string>t/05.misc.t</string>
 		<string>t/10.regression.t</string>
 		<string>examples/perl-reversion</string>
@@ -278,6 +293,6 @@
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{275, 34}, {948, 823}}</string>
+	<string>{{325, 11}, {959, 994}}</string>
 </dict>
 </plist>
