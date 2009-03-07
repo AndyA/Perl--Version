@@ -28,11 +28,14 @@ my %PROJECT_SIGNATURE = (
 );
 
 my $MODULE_RE = qr{ [.] pm $ }x;
+my $SCRIPT_RE = qr/ \p{IsWord}+ /x;    # filenames
 
 # Places to look for files / directories when processing a project
 
 my %CONSIDER = (
   'lib/'     => { like => $MODULE_RE },
+  'bin/'     => { like => $SCRIPT_RE },
+  'script/'  => { like => $SCRIPT_RE },
   'README'   => {},
   'META.yml' => {},
 );
@@ -371,7 +374,9 @@ sub find_versions {
           if ( my @match = $line =~ $trans->{re} ) {
             if ( $trans->{mark} ) {
               my $ver = Perl::Version->new( $2 . $3 . $4 );
-              next if defined $version and "$version" ne "$ver";
+              next
+               if defined $version
+                 and "$version" ne "$ver";
               push @{ $ver_found->{ $ver->normal } },
                {
                 file => $name,
