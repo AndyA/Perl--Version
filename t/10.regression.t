@@ -577,6 +577,70 @@ BEGIN {
       numify      => '1.002003',
     },
     {
+      name    => 'Three components, negative index (-1)',
+      new_arg => '1.2.3',
+      action  => sub {
+        $_->increment( -1 );
+      },
+      components      => 3,
+      component_0     => 1,
+      component_1     => 2,
+      component_2     => 4,
+      component_3     => undef,
+      component_alpha => 0,
+      stringify       => '1.2.4',
+      normal          => 'v1.2.4',
+      numify          => '1.002004',
+    },
+    {
+      name    => 'Three components, negative index (-2)',
+      new_arg => '1.2.3',
+      action  => sub {
+        $_->increment( -2 );
+      },
+      components      => 3,
+      component_0     => 1,
+      component_1     => 3,
+      component_2     => 0,
+      component_3     => undef,
+      component_alpha => 0,
+      stringify       => '1.3.0',
+      normal          => 'v1.3.0',
+      numify          => '1.003000',
+    },
+    {
+      name    => 'Three components, negative index (-3)',
+      new_arg => '1.2.3',
+      action  => sub {
+        $_->increment( -3 );
+      },
+      components      => 3,
+      component_0     => 2,
+      component_1     => 0,
+      component_2     => 0,
+      component_3     => undef,
+      component_alpha => 0,
+      stringify       => '2.0.0',
+      normal          => 'v2.0.0',
+      numify          => '2.000000',
+    },
+    {
+      name    => 'Three components, negative index (-1)',
+      new_arg => '1.2.3',
+      action  => sub {
+        $_->component( -1, 5 );
+      },
+      components      => 3,
+      component_0     => 1,
+      component_1     => 2,
+      component_2     => 5,
+      component_3     => undef,
+      component_alpha => 0,
+      stringify       => '1.2.5',
+      normal          => 'v1.2.5',
+      numify          => '1.002005',
+    },
+    {
       name    => 'Three components, set illegal name',
       new_arg => '1.2.3',
       action  => sub {

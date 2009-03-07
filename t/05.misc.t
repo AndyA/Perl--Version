@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Perl::Version;
-use Test::More tests => 46;
+use Test::More tests => 44;
 
 package dummy;
 sub new { return bless {}, shift }
@@ -75,8 +75,3 @@ like $@, qr/component number/, 'need component number';
 
 eval { $v2->increment( 3 ) };
 like $@, qr/out of range/, 'out of range';
-
-eval { $v2->increment( -1 ) };
-like $@, qr/out of range/, 'out of range';
-
-is $v2->component( -1 ), undef, 'negative component index';

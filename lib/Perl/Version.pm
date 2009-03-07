@@ -83,7 +83,11 @@ sub _resolve_component_name {
   my $self = shift;
   my $name = shift;
 
-  return $name if $name =~ m{ ^ -? \d+ $ }x;
+  if ( $name =~ /^-?\d+$/ ) {
+    # Allow negative subscripts
+    $name += $self->components if $name < 0;
+    return $name;
+  }
 
   croak "Unknown component name: $name"
    unless exists $COMPONENT_NAME{ lc( $name ) };
