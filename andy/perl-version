@@ -20,55 +20,55 @@ my @RCPATH   = ( '.', File::HomeDir->my_home, '/etc' );
 
 # Regexes to classify file types. Can be overridden in .versioneer.rc
 my %FILE_TYPES = (
-    change_file => qr{ ^ C(?i:hanges) $ }x,
-    meta_file   => qr{ (?: (?: META[.]yml ) | MANIFEST ) $ }x,
-    build_file  => qr{ ^ (?: Build | Makefile ) [.] PL $ }x,
+  change_file => qr{ ^ C(?i:hanges) $ }x,
+  meta_file   => qr{ (?: (?: META[.]yml ) | MANIFEST ) $ }x,
+  build_file  => qr{ ^ (?: Build | Makefile ) [.] PL $ }x,
 );
 
 my $VERSION_MATCH = qr{ \d [\d._]+ \d (?i: [a-z]? ) }x;
 
 # Default config
 my %DEFAULTS = (
-    version_line => qr{ ^ ( (?: (?: \S .+ )? (?i: \bversion ) \s+ ) 
+  version_line => qr{ ^ ( (?: (?: \S .+ )? (?i: \bversion ) \s+ ) 
                                         | 
                             (?: .* \$VERSION \s* = .*? ) )
                               ( $VERSION_MATCH ) 
                               ( .* ) $ }xms,
-    %FILE_TYPES
+  %FILE_TYPES
 );
 
 my (
-    $man, $help, $report, $manifest, $verbose, $increment,
-    $set, $undo, $redo,   $force,    $backup
+  $man, $help, $report, $manifest, $verbose, $increment,
+  $set, $undo, $redo,   $force,    $backup
 );
 
 GetOptions(
-    'help|?'       => \$help,
-    'man'          => \$man,
-    'manifest|M:s' => \$manifest,
-    'verbose'      => \$verbose,
-    'report'       => \$report,
-    'increment:s'  => \$increment,
-    'set=s'        => \$set,
-    'undo'         => \$undo,
-    'redo'         => \$redo,
-    'force'        => \$force,
-    'backup:s'     => \$backup,
+  'help|?'       => \$help,
+  'man'          => \$man,
+  'manifest|M:s' => \$manifest,
+  'verbose'      => \$verbose,
+  'report'       => \$report,
+  'increment:s'  => \$increment,
+  'set=s'        => \$set,
+  'undo'         => \$undo,
+  'redo'         => \$redo,
+  'force'        => \$force,
+  'backup:s'     => \$backup,
 
-    # 'extension=s' => \@ext,
-    # 'path=s'      => \@okpath,
-    # 'feed=s'      => \@feed,
-    # 'filter'      => \$filter,
-    # 'csv'         => \$csv,
-    # 'table'       => \$table,
-    # 'db=s'        => \$db,
-    # 'logformat=s' => \$format,
-    # 'outdir=s'    => \$outdir,
-    # 'index=s'     => \$index,
-    # 'style=s'     => \$style,
-    # 'width=i'     => \$graph_w,
-    # 'height=i'    => \$graph_h,
-    # 'title=s'     => \$title
+  # 'extension=s' => \@ext,
+  # 'path=s'      => \@okpath,
+  # 'feed=s'      => \@feed,
+  # 'filter'      => \$filter,
+  # 'csv'         => \$csv,
+  # 'table'       => \$table,
+  # 'db=s'        => \$db,
+  # 'logformat=s' => \$format,
+  # 'outdir=s'    => \$outdir,
+  # 'index=s'     => \$index,
+  # 'style=s'     => \$style,
+  # 'width=i'     => \$graph_w,
+  # 'height=i'    => \$graph_h,
+  # 'title=s'     => \$title
 ) or pod2usage( 2 );
 
 pod2usage( -exitstatus => 0, -verbose => 2 ) if $man;
@@ -82,198 +82,196 @@ my $config = read_rc( default_rc(), $RCFILE, @RCPATH );
 my $type_action;
 
 if ( $report ) {
-    $type_action = {
-        normal_file => sub {
-            my ( $file, $type ) = @_;
-            my $match = $config->{version_line};
-            print "Scanning $file\n";
-            with_file(
-                $file, '<',
-                sub {
-                    my $fh = shift;
-                    while ( defined( my $line = <$fh> ) ) {
-                        chomp $line;
-                        if ( $line =~ $match ) {
-                            my ( $pre, $ver, $post ) = ( $1, $2, $3 );
-                            my @ver = parse_version( $ver );
-                            print "$pre [[[ "
-                              . join( ' ][ ', @ver )
-                              . " ]]] $post\n";
-                        }
-                    }
-                }
-            );
-        },
-        else => sub {
-            my ( $file, $type ) = @_;
-            print "Ignoring $file ($type)\n";
-        },
-    };
+  $type_action = {
+    normal_file => sub {
+      my ( $file, $type ) = @_;
+      my $match = $config->{version_line};
+      print "Scanning $file\n";
+      with_file(
+        $file, '<',
+        sub {
+          my $fh = shift;
+          while ( defined( my $line = <$fh> ) ) {
+            chomp $line;
+            if ( $line =~ $match ) {
+              my ( $pre, $ver, $post ) = ( $1, $2, $3 );
+              my @ver = parse_version( $ver );
+              print "$pre [[[ " . join( ' ][ ', @ver ) . " ]]] $post\n";
+            }
+          }
+        }
+      );
+    },
+    else => sub {
+      my ( $file, $type ) = @_;
+      print "Ignoring $file ($type)\n";
+    },
+  };
 }
 else {
-    $type_action = {
-        else => sub {
-            my $file = shift;
-            print "Scanning $file\n";
-        },
-    };
+  $type_action = {
+    else => sub {
+      my $file = shift;
+      print "Scanning $file\n";
+    },
+  };
 }
 
 my $file_action = sub {
-    my $name = shift;
-    my $type = file_type( $config, $name );
+  my $name = shift;
+  my $type = file_type( $config, $name );
 
-    my $action = $type_action->{$type} || $type_action->{else}
-      or die "No action defined for $name (type = $type)\n";
+  my $action = $type_action->{$type} || $type_action->{else}
+   or die "No action defined for $name (type = $type)\n";
 
-    $action->( $name, $type );
+  $action->( $name, $type );
 };
 
 if ( defined $manifest ) {
-    $manifest ||= $MANIFEST;
+  $manifest ||= $MANIFEST;
 
-    my ( $vol, $dirs, $leaf ) = File::Spec->splitpath( $manifest );
+  my ( $vol, $dirs, $leaf ) = File::Spec->splitpath( $manifest );
 
-    with_lines(
-        $manifest,
-        sub {
-            my $name = shift;
+  with_lines(
+    $manifest,
+    sub {
+      my $name = shift;
 
-            # Trailing comments allowed in MANIFEST
-            $name =~ s{\s+#.*}{};
+      # Trailing comments allowed in MANIFEST
+      $name =~ s{\s+#.*}{};
 
-            $file_action->( File::Spec->catpath( $vol, $dirs, $name ) );
-        }
-    );
+      $file_action->( File::Spec->catpath( $vol, $dirs, $name ) );
+    }
+  );
 }
 else {
-    my @work = @ARGV
-      or pod2usage( 2 );
+  my @work = @ARGV
+   or pod2usage( 2 );
 
-    while ( my $obj = shift @work ) {
-        if ( -d $obj ) {
-            opendir( my $dh, $obj ) or die "Can't read $obj ($!)\n";
-            push @work, map { File::Spec->catfile( $obj, $_ ) }
-              grep { $_ !~ m{ ^ [.] }x } readdir $dh;
-            close $dh;
-        }
-        else {
-            $file_action->( $obj );
-        }
+  while ( my $obj = shift @work ) {
+    if ( -d $obj ) {
+      opendir( my $dh, $obj ) or die "Can't read $obj ($!)\n";
+      push @work, map { File::Spec->catfile( $obj, $_ ) }
+       grep { $_ !~ m{ ^ [.] }x } readdir $dh;
+      close $dh;
     }
+    else {
+      $file_action->( $obj );
+    }
+  }
 }
 
 sub parse_version {
-    my $ver = shift;
-    my @ver = grep { defined } (
-        $ver =~ m{ ^ ( \d+ ) 
+  my $ver = shift;
+  my @ver = grep { defined } (
+    $ver =~ m{ ^ ( \d+ ) 
                         (?: ([.]) ( \d{1,3} ) 
                             (?: ( [_.]? ) ( \d{1,3} ) )? 
                             ( [a-zA-z] )? ) $ }x
-    );
-    return @ver if @ver >= 3 && @ver <= 6;
-    return $ver;
+  );
+  return @ver if @ver >= 3 && @ver <= 6;
+  return $ver;
 }
 
 sub with_file {
-    my ( $name, $mode, $callback ) = @_;
+  my ( $name, $mode, $callback ) = @_;
 
-    open( my $fh, $mode, $name ) or die "Can't $mode $name ($!)\n";
-    $callback->( $fh );
-    close( $fh );
+  open( my $fh, $mode, $name ) or die "Can't $mode $name ($!)\n";
+  $callback->( $fh );
+  close( $fh );
 }
 
 sub with_lines {
-    my ( $name, $callback ) = @_;
+  my ( $name, $callback ) = @_;
 
-    with_file(
-        $name, '<',
-        sub {
-            my $fh = shift;
-            LINE:
-            while ( defined( my $line = <$fh> ) ) {
-                chomp $line;
-                next LINE if $line =~ m{ ^ \s* (?: \# | $ ) }xms;
-                $callback->( $line );
-            }
-        }
-    );
+  with_file(
+    $name, '<',
+    sub {
+      my $fh = shift;
+      LINE:
+      while ( defined( my $line = <$fh> ) ) {
+        chomp $line;
+        next LINE if $line =~ m{ ^ \s* (?: \# | $ ) }xms;
+        $callback->( $line );
+      }
+    }
+  );
 }
 
 sub find_file {
-    my $name = shift;
-    my @path = @_;
+  my $name = shift;
+  my @path = @_;
 
-    for my $p ( @path ) {
-        my $full_name = File::Spec->catfile( $p, $name );
-        return $full_name if -e $full_name;
-    }
+  for my $p ( @path ) {
+    my $full_name = File::Spec->catfile( $p, $name );
+    return $full_name if -e $full_name;
+  }
 
-    return;
+  return;
 }
 
 sub file_type {
-    my ( $config, $name ) = @_;
+  my ( $config, $name ) = @_;
 
-    return 'directory' if -d $name;
+  return 'directory' if -d $name;
 
-    my ( $dev, $path, $leaf ) = File::Spec->splitpath( $name );
+  my ( $dev, $path, $leaf ) = File::Spec->splitpath( $name );
 
-    for my $type ( keys %FILE_TYPES ) {
-        return $type if is_file( $config, $type, $leaf );
-    }
+  for my $type ( keys %FILE_TYPES ) {
+    return $type if is_file( $config, $type, $leaf );
+  }
 
-    return 'normal_file';
+  return 'normal_file';
 }
 
 sub is_file {
-    my ( $config, $type, $name ) = @_;
+  my ( $config, $type, $name ) = @_;
 
-    if ( my $pattern = $config->{$type} ) {
-        return $name =~ $pattern;
-    }
+  if ( my $pattern = $config->{$type} ) {
+    return $name =~ $pattern;
+  }
 
-    return;
+  return;
 }
 
 # Establish default config
 sub default_rc {
-    return {%DEFAULTS};
+  return {%DEFAULTS};
 }
 
 sub read_rc {
-    my $config = shift;
+  my $config = shift;
 
-    if ( my $name = find_file( @_ ) ) {
-        my $key;
+  if ( my $name = find_file( @_ ) ) {
+    my $key;
 
-        with_lines(
-            $name,
-            sub {
-                my $line = shift;
-                if ( $line =~ m{ ^ \s+ ( .+ ) }xms ) {
-                    die "Illegal continuation at $name, line $.\n"
-                      unless defined $key;
-                    $config->{$key} .= ' ' . $1;
-                }
-                elsif (
-                    $line =~ m{ ^ ( \w+ )
+    with_lines(
+      $name,
+      sub {
+        my $line = shift;
+        if ( $line =~ m{ ^ \s+ ( .+ ) }xms ) {
+          die "Illegal continuation at $name, line $.\n"
+           unless defined $key;
+          $config->{$key} .= ' ' . $1;
+        }
+        elsif (
+          $line =~ m{ ^ ( \w+ )
                                   (?: (?: \s* [=:] \s* ) | \s+ ) \s*
                                   ( .* )
                               }xms
-                  ) {
-                    exists $DEFAULTS{ $key = $1 }
-                      or die "Unknown config option $key at $name, line $.\n";
-                    $config->{$key} = $2;
-                }
-                else {
-                    die "Bad syntax at $name, line $.\n";
-                }
-            }
-        );
-    }
+         ) {
+          exists $DEFAULTS{ $key = $1 }
+           or die "Unknown config option $key at $name, line $.\n";
+          $config->{$key} = $2;
+        }
+        else {
+          die "Bad syntax at $name, line $.\n";
+        }
+      }
+    );
+  }
 
-    return $config;
+  return $config;
 }
 
 __END__

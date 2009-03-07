@@ -8,9 +8,9 @@ use Scalar::Util qw( blessed );
 our $VERSION = '1.008';
 
 use overload (
-    '""'  => \&stringify,
-    '<=>' => \&vcmp,
-    'cmp' => \&vcmp,
+  '""'  => \&stringify,
+  '<=>' => \&vcmp,
+  'cmp' => \&vcmp,
 );
 
 use constant REGEX => qr/ ( (?i: Revision: \s+ ) | v | )
@@ -20,340 +20,342 @@ use constant REGEX => qr/ ( (?i: Revision: \s+ ) | v | )
 use constant MATCH => qr/ ^ ( \s* ) @{[ REGEX ]} ( \s* ) $ /x;
 
 my %NORMAL_FORMAT = (
-    prefix => 'v',
-    printf => ['%d'],
-    extend => '.%d',
-    alpha  => '_%02d',
-    suffix => '',
-    fields => 3,
+  prefix => 'v',
+  printf => ['%d'],
+  extend => '.%d',
+  alpha  => '_%02d',
+  suffix => '',
+  fields => 3,
 );
 
 my %NUMERIC_FORMAT = (
-    prefix => '',
-    printf => [ '%d', '.%03d' ],
-    extend => '%03d',
-    alpha  => '_%02d',
-    suffix => '',
-    fields => 2,
+  prefix => '',
+  printf => [ '%d', '.%03d' ],
+  extend => '%03d',
+  alpha  => '_%02d',
+  suffix => '',
+  fields => 2,
 );
 
 my %COMPONENT_NAME;
 
 BEGIN {
-    %COMPONENT_NAME = (
-        revision   => 0,
-        version    => 1,
-        subversion => 2
-    );
+  %COMPONENT_NAME = (
+    revision   => 0,
+    version    => 1,
+    subversion => 2
+  );
 
-    # Make accessors
-    my @fields = ( keys %COMPONENT_NAME, qw( alpha ) );
+  # Make accessors
+  my @fields = ( keys %COMPONENT_NAME, qw( alpha ) );
 
-    no strict 'refs';
+  no strict 'refs';
 
-    for my $field ( @fields ) {
-        *$field = sub {
-            my $self = shift;
-            return $self->component( $field, @_ );
-        };
+  for my $field ( @fields ) {
+    *$field = sub {
+      my $self = shift;
+      return $self->component( $field, @_ );
+    };
 
-        my $inc_func = "inc_$field";
-        *$inc_func = sub {
-            my $self = shift;
-            return $self->increment( $field );
-        };
-    }
+    my $inc_func = "inc_$field";
+    *$inc_func = sub {
+      my $self = shift;
+      return $self->increment( $field );
+    };
+  }
 }
 
 sub new {
-    my $class = shift;
-    my $self = bless {}, ref $class
-      || $class
-      || croak "new must be called as a class or object method";
+  my $class = shift;
+  my $self 
+   = bless {}, ref $class
+   || $class
+   || croak "new must be called as a class or object method";
 
-    $self->{version} = [0];
+  $self->{version} = [0];
 
-    $self->_parse( @_ ) if @_;
+  $self->_parse( @_ ) if @_;
 
-    return $self;
+  return $self;
 }
 
 sub _resolve_component_name {
-    my $self = shift;
-    my $name = shift;
+  my $self = shift;
+  my $name = shift;
 
-    return $name if $name =~ m{ ^ -? \d+ $ }x;
+  return $name if $name =~ m{ ^ -? \d+ $ }x;
 
-    croak "Unknown component name: $name"
-      unless exists $COMPONENT_NAME{ lc( $name ) };
+  croak "Unknown component name: $name"
+   unless exists $COMPONENT_NAME{ lc( $name ) };
 
-    return $COMPONENT_NAME{ lc( $name ) };
+  return $COMPONENT_NAME{ lc( $name ) };
 }
 
 sub _guess_num_format {
-    my $self = shift;
-    my $num  = shift;
+  my $self = shift;
+  my $num  = shift;
 
-    if ( $num =~ m{ ^ 0 \d }x ) {
-        return '%0' . length( $num ) . 'd';
-    }
+  if ( $num =~ m{ ^ 0 \d }x ) {
+    return '%0' . length( $num ) . 'd';
+  }
 
-    return '%d';
+  return '%d';
 }
 
 sub _parse {
-    my $self = shift;
+  my $self = shift;
 
-    # Check for vstring before anything else happens
-    if ( $] >= 5.008_001 && Scalar::Util::isvstring $_[0] ) {
-        $self->{format} = {%NORMAL_FORMAT};
-        my @parts = map { ord } split //, shift;
-        $self->{version} = \@parts;
-        return;
-    }
-
-    my $version = join( ' ', map { "$_" } @_ );
-
-    croak "Illegal version string: $version"
-      unless $version =~ MATCH;
-
-    my $format = { fields => 1 };
-    my ( $pad, $pfx, $ver, $alp, $sfx ) = ( $1, $2, $3, $4, $5 );
-
-    # Decode version into format
-    $format->{prefix} = $pad . $pfx;
-    $format->{suffix} = $sfx;
-
-    my @parts = split( /[.]/, $ver );
-    my @ver = ( shift( @parts ) + 0 );
-
-    my @fmt = ( $self->_guess_num_format( $ver[0] ) );
-
-    if ( @parts == 1 && length( $parts[0] ) >= 3 ) {
-
-        my $threes = pop @parts;
-        my @cluster = ( $threes =~ /(\d{1,3})/g );
-
-        # warn "# $threes <", join( '>, <', @cluster ), ">\n";
-        push @fmt, map { $self->_guess_num_format( $_ ) } @cluster;
-        $fmt[1] = '.' . $fmt[1];
-        $format->{extend} = '%03d';
-
-        push @parts, map { 0 + $_ } @cluster;
-    }
-    else {
-
-        # Parts with leading zeros
-        my @lz = grep { m{ ^ 0 \d }x } @parts;
-
-        # Work out how many different lengths we have
-        my %le = map { length( $_ ) => 1 } @parts;
-
-        if ( @lz && keys %le == 1 ) {
-            push @fmt, ( '.' . $self->_guess_num_format( shift @lz ) ) x @parts;
-        }
-        else {
-            push @fmt, map { '.' . $self->_guess_num_format( $_ ) } @parts;
-        }
-
-        $format->{extend} = ( @parts ? '' : '.' ) . $fmt[-1];
-    }
-
-    $format->{printf} = \@fmt;
-
-    if ( length( $alp ) ) {
-        die "Badly formatted alpha got through"
-          unless $alp =~ m{ _ (\d+) }x;
-
-        my $alpha = $1;
-
-        $self->{alpha}   = $alpha + 0;
-        $format->{alpha} = '_' . $self->_guess_num_format( $alpha );
-    }
-    else {
-        $format->{alpha} = $NORMAL_FORMAT{alpha};
-    }
-
-    $self->{format} = $format;
-
-    push @ver, map { $_ + 0 } @parts;
-
-    $self->{version} = \@ver;
-
+  # Check for vstring before anything else happens
+  if ( $] >= 5.008_001 && Scalar::Util::isvstring $_[0] ) {
+    $self->{format} = {%NORMAL_FORMAT};
+    my @parts = map { ord } split //, shift;
+    $self->{version} = \@parts;
     return;
+  }
+
+  my $version = join( ' ', map { "$_" } @_ );
+
+  croak "Illegal version string: $version"
+   unless $version =~ MATCH;
+
+  my $format = { fields => 1 };
+  my ( $pad, $pfx, $ver, $alp, $sfx ) = ( $1, $2, $3, $4, $5 );
+
+  # Decode version into format
+  $format->{prefix} = $pad . $pfx;
+  $format->{suffix} = $sfx;
+
+  my @parts = split( /[.]/, $ver );
+  my @ver = ( shift( @parts ) + 0 );
+
+  my @fmt = ( $self->_guess_num_format( $ver[0] ) );
+
+  if ( @parts == 1 && length( $parts[0] ) >= 3 ) {
+
+    my $threes = pop @parts;
+    my @cluster = ( $threes =~ /(\d{1,3})/g );
+
+    # warn "# $threes <", join( '>, <', @cluster ), ">\n";
+    push @fmt, map { $self->_guess_num_format( $_ ) } @cluster;
+    $fmt[1] = '.' . $fmt[1];
+    $format->{extend} = '%03d';
+
+    push @parts, map { 0 + $_ } @cluster;
+  }
+  else {
+
+    # Parts with leading zeros
+    my @lz = grep { m{ ^ 0 \d }x } @parts;
+
+    # Work out how many different lengths we have
+    my %le = map { length( $_ ) => 1 } @parts;
+
+    if ( @lz && keys %le == 1 ) {
+      push @fmt,
+       ( '.' . $self->_guess_num_format( shift @lz ) ) x @parts;
+    }
+    else {
+      push @fmt, map { '.' . $self->_guess_num_format( $_ ) } @parts;
+    }
+
+    $format->{extend} = ( @parts ? '' : '.' ) . $fmt[-1];
+  }
+
+  $format->{printf} = \@fmt;
+
+  if ( length( $alp ) ) {
+    die "Badly formatted alpha got through"
+     unless $alp =~ m{ _ (\d+) }x;
+
+    my $alpha = $1;
+
+    $self->{alpha}   = $alpha + 0;
+    $format->{alpha} = '_' . $self->_guess_num_format( $alpha );
+  }
+  else {
+    $format->{alpha} = $NORMAL_FORMAT{alpha};
+  }
+
+  $self->{format} = $format;
+
+  push @ver, map { $_ + 0 } @parts;
+
+  $self->{version} = \@ver;
+
+  return;
 }
 
 sub _format {
-    my $self   = shift;
-    my $format = shift;
+  my $self   = shift;
+  my $format = shift;
 
-    my @result = ();
+  my @result = ();
 
-    my @parts = @{ $self->{version} };
-    my @fmt   = @{ $format->{printf} };
+  my @parts = @{ $self->{version} };
+  my @fmt   = @{ $format->{printf} };
 
-    push @parts, 0 while @parts < $format->{fields};
+  push @parts, 0 while @parts < $format->{fields};
 
-    # Adjust the format to be the same length as the number of fields
-    pop @fmt while @fmt > @parts;
-    push @fmt, $format->{extend} while @parts > @fmt;
+  # Adjust the format to be the same length as the number of fields
+  pop @fmt while @fmt > @parts;
+  push @fmt, $format->{extend} while @parts > @fmt;
 
-    my $version
-      = ( $format->{prefix} )
-      . sprintf( join( '', @fmt ), @parts )
-      . ( $format->{suffix} );
+  my $version
+   = ( $format->{prefix} )
+   . sprintf( join( '', @fmt ), @parts )
+   . ( $format->{suffix} );
 
-    $version .= sprintf( $format->{alpha}, $self->{alpha} )
-      if defined $self->{alpha};
+  $version .= sprintf( $format->{alpha}, $self->{alpha} )
+   if defined $self->{alpha};
 
-    push @result, $version;
+  push @result, $version;
 
-    return join( ' ', @result );
+  return join( ' ', @result );
 }
 
 sub stringify {
-    my $self = shift;
-    return $self->_format( $self->{format} || \%NORMAL_FORMAT );
+  my $self = shift;
+  return $self->_format( $self->{format} || \%NORMAL_FORMAT );
 }
 
 sub normal {
-    return shift->_format( \%NORMAL_FORMAT );
+  return shift->_format( \%NORMAL_FORMAT );
 }
 
 sub numify {
-    return shift->_format( \%NUMERIC_FORMAT );
+  return shift->_format( \%NUMERIC_FORMAT );
 }
 
 sub is_alpha {
-    my $self = shift;
-    return exists $self->{alpha};
+  my $self = shift;
+  return exists $self->{alpha};
 }
 
 sub vcmp {
-    my ( $self, $other, $rev ) = @_;
+  my ( $self, $other, $rev ) = @_;
 
-    # Promote to object
-    $other = __PACKAGE__->new( $other ) unless ref $other;
+  # Promote to object
+  $other = __PACKAGE__->new( $other ) unless ref $other;
 
-    croak "Can't compare with $other"
-      unless blessed $other && $other->isa( __PACKAGE__ );
+  croak "Can't compare with $other"
+   unless blessed $other && $other->isa( __PACKAGE__ );
 
-    return $other->vcmp( $self, 0 ) if $rev;
+  return $other->vcmp( $self, 0 ) if $rev;
 
-    my @this = @{ $self->{version} };
-    my @that = @{ $other->{version} };
+  my @this = @{ $self->{version} };
+  my @that = @{ $other->{version} };
 
-    push @this, 0 while @this < @that;
-    push @that, 0 while @that < @this;
+  push @this, 0 while @this < @that;
+  push @that, 0 while @that < @this;
 
-    while ( @this ) {
-        if ( my $cmp = ( shift( @this ) <=> shift( @that ) ) ) {
-            return $cmp;
-        }
+  while ( @this ) {
+    if ( my $cmp = ( shift( @this ) <=> shift( @that ) ) ) {
+      return $cmp;
     }
+  }
 
-    return ( $self->{alpha} || 0 ) <=> ( $other->{alpha} || 0 );
+  return ( $self->{alpha} || 0 ) <=> ( $other->{alpha} || 0 );
 }
 
 sub components {
-    my $self = shift;
+  my $self = shift;
 
-    if ( @_ ) {
-        my $fields = shift;
+  if ( @_ ) {
+    my $fields = shift;
 
-        if ( ref $fields eq 'ARRAY' ) {
-            $self->{version} = [@$fields];
-        }
-        else {
-            croak "Can't set the number of components to 0"
-              unless $fields;
-
-            # Adjust the number of fields
-            pop @{ $self->{version} }, while @{ $self->{version} } > $fields;
-            push @{ $self->{version} }, 0,
-              while @{ $self->{version} } < $fields;
-        }
+    if ( ref $fields eq 'ARRAY' ) {
+      $self->{version} = [@$fields];
     }
     else {
-        return @{ $self->{version} };
+      croak "Can't set the number of components to 0"
+       unless $fields;
+
+      # Adjust the number of fields
+      pop @{ $self->{version} }, while @{ $self->{version} } > $fields;
+      push @{ $self->{version} }, 0,
+       while @{ $self->{version} } < $fields;
     }
+  }
+  else {
+    return @{ $self->{version} };
+  }
 }
 
 sub component {
-    my $self  = shift;
-    my $field = shift;
+  my $self  = shift;
+  my $field = shift;
 
-    defined $field or croak "You must specify a component number";
+  defined $field or croak "You must specify a component number";
 
-    if ( lc( $field ) eq 'alpha' ) {
-        if ( @_ ) {
-            my $alpha = shift;
-            if ( $alpha ) {
-                $self->{alpha} = $alpha;
-            }
-            else {
-                delete $self->{alpha};
-            }
-        }
-        else {
-            return $self->{alpha} || 0;
-        }
+  if ( lc( $field ) eq 'alpha' ) {
+    if ( @_ ) {
+      my $alpha = shift;
+      if ( $alpha ) {
+        $self->{alpha} = $alpha;
+      }
+      else {
+        delete $self->{alpha};
+      }
     }
     else {
-        $field = $self->_resolve_component_name( $field );
-        my $fields = $self->components;
-
-        if ( @_ ) {
-            if ( $field >= $fields ) {
-
-                # Extend array if necessary
-                $self->components( $field + 1 );
-            }
-
-            $self->{version}->[$field] = shift;
-        }
-        else {
-            return unless $field >= 0 && $field < $fields;
-            return $self->{version}->[$field];
-        }
+      return $self->{alpha} || 0;
     }
+  }
+  else {
+    $field = $self->_resolve_component_name( $field );
+    my $fields = $self->components;
+
+    if ( @_ ) {
+      if ( $field >= $fields ) {
+
+        # Extend array if necessary
+        $self->components( $field + 1 );
+      }
+
+      $self->{version}->[$field] = shift;
+    }
+    else {
+      return unless $field >= 0 && $field < $fields;
+      return $self->{version}->[$field];
+    }
+  }
 }
 
 sub increment {
-    my $self   = shift;
-    my $field  = shift;
-    my $fields = $self->components;
+  my $self   = shift;
+  my $field  = shift;
+  my $fields = $self->components;
 
-    if ( lc( $field ) eq 'alpha' ) {
-        $self->alpha( $self->alpha + 1 );
+  if ( lc( $field ) eq 'alpha' ) {
+    $self->alpha( $self->alpha + 1 );
+  }
+  else {
+    $field = $self->_resolve_component_name( $field );
+
+    croak "Component $field is out of range 0..", $fields - 1
+     if $field < 0 || $field >= $fields;
+
+    # Increment the field
+    $self->component( $field, $self->component( $field ) + 1 );
+
+    # Zero out any following fields
+    while ( ++$field < $fields ) {
+      $self->component( $field, 0 );
     }
-    else {
-        $field = $self->_resolve_component_name( $field );
-
-        croak "Component $field is out of range 0..", $fields - 1
-          if $field < 0 || $field >= $fields;
-
-        # Increment the field
-        $self->component( $field, $self->component( $field ) + 1 );
-
-        # Zero out any following fields
-        while ( ++$field < $fields ) {
-            $self->component( $field, 0 );
-        }
-        $self->alpha( 0 );
-    }
+    $self->alpha( 0 );
+  }
 }
 
 sub set {
-    my $self  = shift;
-    my $other = shift;
+  my $self  = shift;
+  my $other = shift;
 
-    $other = __PACKAGE__->new( $other ) unless ref $other;
+  $other = __PACKAGE__->new( $other ) unless ref $other;
 
-    my @comp = $other->components;
+  my @comp = $other->components;
 
-    $self->components( \@comp );
-    $self->alpha( $other->alpha );
+  $self->components( \@comp );
+  $self->alpha( $other->alpha );
 }
 
 1;

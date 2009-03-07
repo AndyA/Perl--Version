@@ -17,27 +17,27 @@ my $warned;
 local $SIG{__WARN__} = sub { $warned = shift };
 
 my %expect = (
-    stringify  => 'v0.0.0',
-    numify     => '0.000',
-    components => '1',
-    alpha      => 0,
-    normal     => 'v0.0.0',
-    revision   => 0,
-    version    => undef,
-    subversion => undef,
-    is_alpha   => '',
+  stringify  => 'v0.0.0',
+  numify     => '0.000',
+  components => '1',
+  alpha      => 0,
+  normal     => 'v0.0.0',
+  revision   => 0,
+  version    => undef,
+  subversion => undef,
+  is_alpha   => '',
 );
 
 while ( my ( $meth, $expect ) = each %expect ) {
-    $warned = undef;
-    my $result = eval { $v1->$meth };
-    unless ( ok !$@, "$meth: no error" ) {
-        diag( "Error was $@" );
-    }
-    unless ( ok !$warned, "$meth: no warning" ) {
-        diag( "Warning was $@" );
-    }
-    is $result, $expect, "$meth: result OK";
+  $warned = undef;
+  my $result = eval { $v1->$meth };
+  unless ( ok !$@, "$meth: no error" ) {
+    diag( "Error was $@" );
+  }
+  unless ( ok !$warned, "$meth: no warning" ) {
+    diag( "Warning was $@" );
+  }
+  is $result, $expect, "$meth: result OK";
 }
 
 my $v2 = Perl::Version->new( '5.8.8' );

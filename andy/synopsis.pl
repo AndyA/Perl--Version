@@ -11,13 +11,13 @@ use Perl::Version;
 my $version = Perl::Version->new( '1.2.3' );
 
 # Stringification preserves original format
-print "$version\n";                 # prints '1.2.3'
+print "$version\n";    # prints '1.2.3'
 
 # Normalised
-print $version->normal, "\n";       # prints 'v1.2.3'
+print $version->normal, "\n";    # prints 'v1.2.3'
 
 # Numified
-print $version->numify, "\n";       # prints '1.002003'
+print $version->numify, "\n";    # prints '1.002003'
 
 # Explicitly stringified
 print $version->stringify, "\n";    # prints '1.2.3'

@@ -10,13 +10,13 @@ use Perl::Tidy;
 $| = 1;
 
 while ( defined( my $ver = shift ) ) {
-    my $version = Perl::Version::Mutable->new( $ver );
-    my $dump    = Data::Dumper->Dump( [$version], ['$version'] );
-    my $tidy    = '';
-    Perl::Tidy::perltidy(
-        source      => \$dump,
-        destination => \$tidy,
-    );
+  my $version = Perl::Version::Mutable->new( $ver );
+  my $dump    = Data::Dumper->Dump( [$version], ['$version'] );
+  my $tidy    = '';
+  Perl::Tidy::perltidy(
+    source      => \$dump,
+    destination => \$tidy,
+  );
 
-    print "$tidy\n";
+  print "$tidy\n";
 }
