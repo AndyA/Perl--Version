@@ -74,3 +74,8 @@ Revision history for Perl-Version
         Allow negative indexes on component, increment. See #42181.
         perl-reversion now checks in bin, script subdirectories. See #28119.
 
+1.009   2009-03-08
+        Make perl-reversion better at inferring version from structured
+        files and not getting confused by unstructured files (like
+        README). See #43946.
+
