@@ -33,7 +33,7 @@ my %ARGS = (
 $ARGS{SIGN} = 1 if MM->can( 'signature_target' );
 
 while ( my ( $exe, $spec ) = each %EXE ) {
-  my $yn = prompt( "Install $exe script?", "N" );
+  my $yn = prompt( "Install $exe script?", "Y" );
   if ( $yn =~ /^y/i ) {
     while ( my ( $key, $val ) = each %$spec ) {
       if ( ref $val eq 'HASH' ) {
