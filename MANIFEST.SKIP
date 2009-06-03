@@ -1,14 +1,21 @@
 \.tmproj$
 \.tar\.gz$
 \B\.svn\b
+\B\.git\b
 ^\.cvsignore
+^\.perltidyrc
+^\.gitignore
 
 # Makemaker generated files and dirs.
 ^MANIFEST\.
 ^Makefile$
+^Build$
 ^andy/
+^incoming/
+^t/disabled/
 ^blib/
 ^pm_to_blib$
+^_build/
 
 # Temp, old and emacs backup files.
 ~$
@@ -18,5 +25,8 @@
 ^\.#
 ^cover_db
 ^try[.]store$
-^\.perltidyrc$
-
+^TODO$
+\.swp$
+^\.prove$
+^Perl-Version-
+^Session\.vim$
