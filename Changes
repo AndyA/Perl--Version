@@ -79,5 +79,5 @@ Revision history for Perl-Version
         files and not getting confused by unstructured files (like
         README). See #43946.
 
-1.010
+1.010   2010-09-19
         Install perl-reversion by default.
