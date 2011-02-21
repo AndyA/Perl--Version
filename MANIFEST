@@ -1,7 +1,5 @@
-Build.PL
 Changes
 examples/perl-reversion
-inc/MyBuilder.pm
 lib/Perl/Version.pm
 Makefile.PL
 MANIFEST
