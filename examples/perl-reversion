@@ -46,7 +46,7 @@ my %CONSIDER = (
 my $MAX_UP = 5;
 
 # Directories to skip during expansion
-my $SKIP = qr{^ [.]svn | CVS | [.]DS_Store $}x;
+my $SKIP = qr{^ [.]svn | CVS | [.]DS_Store | [.]git $}x;
 
 # Subroutines to identify file types
 my @MAGIC = (
