@@ -14,7 +14,7 @@ name: Perl-Version
 provides:
   Perl::Version:
     file: lib/Perl/Version.pm
-    version: 1.010
+    version: 1.011
 requires:
   File::Slurp: 9999.12
   Getopt::Long: 2.34
@@ -24,5 +24,5 @@ requires:
 resources:
   bugtracker: http://rt.cpan.org/NoAuth/Bugs.html?Dist=Perl-Version
   license: http://dev.perl.org/licenses/
-  repository: git://github.com/AndyA/Perl--Version.git
-version: 1.010
+  repository: 'git://github.com/AndyA/Perl--Version.git (fetch)'
+version: 1.011
