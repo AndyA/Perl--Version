@@ -81,3 +81,7 @@ Revision history for Perl-Version
 
 1.010   2010-09-19
         Install perl-reversion by default.
+
+1.011   2011-02-21
+        Remove Build.PL which didn't install perl-reversion.
+
