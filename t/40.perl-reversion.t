@@ -20,7 +20,7 @@ my $RUN = "$^X $libs examples/perl-reversion";
 if ( system( "$RUN -quiet" ) ) {
   plan skip_all => 'cannot run perl-reversion, skipping its tests';
 }
-plan tests => 20;
+plan tests => 22;
 
 my $dir = File::Temp::tempdir( CLEANUP => 1 );
 
@@ -128,6 +128,20 @@ our $VERSION = '1.2.3';
 1;
 END
   sub { runtests( pm => "1.2.3" ) },
+);
+
+with_file(
+  "Foo.pm", <<'END',
+package Foo;
+our $VERSION = version->declare('v1.2.3');
+1;
+END
+  sub {
+    is_deeply( find( $dir ), { found => 'v1.2.3' }, "found in pm" );
+    _run( $dir, '-set', '1.2' );
+    _run( $dir, '-bump' );
+    is_deeply( find( $dir ), { found => 'v1.3' }, "bump subversion with v prefix" );
+  },
 );
 
 with_file(
