@@ -461,7 +461,8 @@ sub save_all {
     }
     else {
       note( "Saving $doc\n" );
-      write_file( $doc, { atomic => 1 }, $docs->{$doc}{lines} );
+      my $perms =  -x $doc ? 0777 : 0666;
+      write_file( $doc, { atomic => 1, perms => $perms }, $docs->{$doc}{lines} );
     }
   }
 }
