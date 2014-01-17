@@ -31,3 +31,4 @@
 ^Perl-Version-
 ^Session\.vim$
 ^MYMETA\..*$
+^patch\.

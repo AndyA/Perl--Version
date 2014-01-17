@@ -21,10 +21,12 @@ use File::Basename;
 my %PROJECT_SIGNATURE = (
   'Makefile.PL' => 0.4,
   'Build.PL'    => 0.4,
+  'dist.ini'    => 0.4,
   'MANIFEST'    => 0.4,
   't/'          => 0.4,
   'lib/'        => 0.4,
   'Changes'     => 0.4,
+  'xt/'         => 0.4,
 );
 
 my $MODULE_RE = qr{ [.] pm $ }x;
