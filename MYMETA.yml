@@ -2,27 +2,26 @@
 abstract: 'Parse and manipulate Perl version strings'
 author:
   - 'Andy Armstrong <andy@hexten.net>'
+build_requires:
+  ExtUtils::MakeMaker: 0
 configure_requires:
-  Module::Build: 0.36
+  ExtUtils::MakeMaker: 0
 dynamic_config: 0
-generated_by: 'Module::Build version 0.3607'
+generated_by: 'ExtUtils::MakeMaker version 6.86, CPAN::Meta::Converter version 2.120921'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
 name: Perl-Version
-provides:
-  Perl::Version:
-    file: lib/Perl/Version.pm
-    version: 1.011
+no_index:
+  directory:
+    - t
+    - inc
 requires:
+  Data::Dumper: 0
   File::Slurp: 9999.12
   Getopt::Long: 2.34
   Pod::Usage: 1.3
   Scalar::Util: 0
   Test::More: 0
-resources:
-  bugtracker: http://rt.cpan.org/NoAuth/Bugs.html?Dist=Perl-Version
-  license: http://dev.perl.org/licenses/
-  repository: 'git://github.com/AndyA/Perl--Version.git (fetch)'
-version: 1.011
+version: 1.012

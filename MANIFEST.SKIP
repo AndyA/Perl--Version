@@ -30,4 +30,4 @@
 ^\.prove$
 ^Perl-Version-
 ^Session\.vim$
-^MYMETA.yml$
+^MYMETA\..*$
