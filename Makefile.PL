@@ -17,6 +17,7 @@ my %ARGS = (
     'Getopt::Long' => '2.34',
     'Pod::Usage'   => '1.3',
     'File::Slurp'  => '9999.12',
+    'Data::Dumper' => 0,
   },
   EXE_FILES => ['examples/perl-reversion'],
   dist      => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },

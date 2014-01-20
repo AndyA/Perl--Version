@@ -7,6 +7,8 @@ use File::Temp;
 use File::Path qw(mkpath);
 use File::Spec;
 use FileHandle;
+use File::Slurp;
+use Data::Dumper;
 
 if ( $^O =~ /MSWin32/ ) {
   plan skip_all => 'cannot run on Windows';
@@ -20,7 +22,7 @@ my $RUN = "$^X $libs examples/perl-reversion";
 if ( system( "$RUN -quiet" ) ) {
   plan skip_all => 'cannot run perl-reversion, skipping its tests';
 }
-plan tests => 22;
+plan tests => 44;
 
 my $dir = File::Temp::tempdir( CLEANUP => 1 );
 
@@ -56,25 +58,61 @@ sub with_file {
   my ( $name, $content, $code ) = @_;
   my $fh = FileHandle->new( "> $dir/$name" )
    or die "Can't open $dir/$name: $!";
+  binmode $fh;
   print $fh $content;
   close $fh;
   $code->();
   unlink "$dir/$name" or die "Can't unlink $dir/$name: $!";
 }
 
+sub count_newlines {
+    my @newlines= ("\x{0d}\x{0a}","\x{0d}","\x{0a}");
+    my %result;
+    for my $name (@_) {
+        my $content= read_file($name, binmode => ':raw' );
+        
+        $result{ $name }= +{
+            map {
+                my $key= unpack 'H*', $_;
+                my $count =()= $content=~ /$_/g;
+                $key=>$count
+            } @newlines
+        };
+    };
+    %result
+};
+
+sub ok_newlines {
+    my( $name, %expected ) = @_;
+    my %got= count_newlines( keys %expected );
+    
+    is_deeply \%got, \%expected,
+        "$name - All newlines remain intact"
+      or diag Dumper [ \%expected, \%got ];
+};
+
+
 sub runtests {
   my ( $name, $version ) = @_;
+  
+  # Check that we keep line endings consistent:
+  my @files= (grep { -f } glob( "$dir/*" ), glob( "$dir/*/*" ) );
+  my %newlines= count_newlines( @files );
+  
   is_deeply( find( $dir ), { found => '1.2.3' }, "found in $name" );
   is_deeply( find( $dir, "-current=1.2" ),
     {}, "partial does not match" );
   _run( $dir, '-set', '1.2' );
+  ok_newlines( "$name -set", %newlines );
   _run( $dir, '-bump' );
+  ok_newlines( "$name -bump", %newlines );
   is_deeply(
     find( $dir ),
     { found => '1.3', },
     "-bump did not extend version"
   );
   my $rv = _run( $dir, '-bump-subversion', '2>&1' );
+  ok_newlines( "$name -bump-subversion", %newlines );
   like(
     $rv->{output},
     qr/version 1\.3 does not have 'subversion' component/,
@@ -149,4 +187,9 @@ with_file(
 This README describes version 1.2.3 of Flurble.
 END
   sub { runtests( plain => "1.2.3" ) },
+);
+
+with_file(
+  README => "This README describes\x{0d}\x{0a}version 1.2.3 of\x{0d}\x{0a}Flurble.\x{0a}",
+  sub { runtests( newlines => "1.2.3" ) },
 );

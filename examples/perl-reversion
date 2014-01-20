@@ -21,10 +21,12 @@ use File::Basename;
 my %PROJECT_SIGNATURE = (
   'Makefile.PL' => 0.4,
   'Build.PL'    => 0.4,
+  'dist.ini'    => 0.4,
   'MANIFEST'    => 0.4,
   't/'          => 0.4,
   'lib/'        => 0.4,
   'Changes'     => 0.4,
+  'xt/'         => 0.4,
 );
 
 my $MODULE_RE = qr{ [.] pm $ }x;
@@ -214,23 +216,23 @@ sub version_re_perl {
   return
    qr{ ^ ( .*?  [\$\*] (?: \w+ (?: :: | ' ) )* VERSION \s* = \D*? )
                  $ver_re 
-                 ( .* ) $ }x;
+                 ( .* \s*) \z }x;
 }
 
 sub version_re_pod {
   my $ver_re = shift;
 
-  return qr{ ^ ( .*? (?i: version ) .*? ) $ver_re ( .* ) $ }x;
+  return qr{ ^ ( .*? (?i: version ) .*? ) $ver_re ( .* \s*) \z }x;
 }
 
 sub version_re_plain {
   my $ver_re = shift;
-  return qr{ ^ ( .*? ) $ver_re ( .* ) $ }x;
+  return qr{ ^ ( .*? ) $ver_re ( .* \s* ) \z }x;
 }
 
 sub version_re_meta {
   my ( $indent, $ver_re ) = @_;
-  return qr{ ^ ( $indent version: \s* ) $ver_re ( \s* ) $ }x;
+  return qr{ ^ ( $indent version: \s* ) $ver_re ( \s* ) }x;
 }
 
 sub set_versions {
@@ -259,7 +261,7 @@ sub set_versions {
       }
 
       $info->{lines}[ $edit->{line} ]
-       = $edit->{pre} . $edit->{ver} . $edit->{post} . "\n";
+       = $edit->{pre} . $edit->{ver} . $edit->{post};
       $info->{dirty}++;
     }
   }
@@ -443,7 +445,7 @@ sub load_all {
 
     #note( "Loading $doc\n" );
     $docs->{$doc} = {
-      lines => read_file( $doc, array_ref => 1 ),
+      lines => read_file( $doc, binmode => ':raw', array_ref => 1 ),
       dirty => 0,
     };
     $docs->{$doc}{type} = guess_type( $doc, $docs->{$doc} );
@@ -461,7 +463,7 @@ sub save_all {
     }
     else {
       note( "Saving $doc\n" );
-      write_file( $doc, { atomic => 1 }, $docs->{$doc}{lines} );
+      write_file( $doc, { binmode=> ':raw',atomic => 1 }, $docs->{$doc}{lines} );
     }
   }
 }

@@ -520,7 +520,7 @@ Versions with a leading 'v'.
 
 Fielded numeric versions. You'll likely have seen this in relation to
 versions of Perl itself. If a version string has a single decimal point
-and the part after the point is three more more digits long components
+and the part after the point is three more more digits long, components
 are extracted from each group of three digits in the fractional part.
 
 For example
@@ -919,7 +919,7 @@ prints
 =item C<< <=> >> and C<< cmp >>
 
 The C<< <=> >> and C<< cmp >> operators are overloaded (by the L<vcmp>
-method) so that comparisions between versions work as expected. This
+method) so that comparisons between versions work as expected. This
 means that the other numeric and string comparison operators also work
 as expected.
 
