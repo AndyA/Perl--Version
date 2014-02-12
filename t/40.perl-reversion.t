@@ -7,7 +7,7 @@ use File::Temp;
 use File::Path qw(mkpath);
 use File::Spec;
 use FileHandle;
-use File::Slurp;
+use File::Slurp::Tiny qw(read_file);
 use Data::Dumper;
 
 if ( $^O =~ /MSWin32/ ) {
