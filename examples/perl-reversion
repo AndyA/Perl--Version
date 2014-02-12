@@ -8,10 +8,10 @@
 use strict;
 use warnings;
 use Perl::Version;
+use Carp qw(croak);
 use Getopt::Long;
 use Pod::Usage;
 use File::Spec;
-use File::Slurp qw(write_file);
 use File::Slurp::Tiny qw(read_lines);
 use File::Basename;
 
@@ -464,7 +464,10 @@ sub save_all {
     }
     else {
       note( "Saving $doc\n" );
-      write_file( $doc, { binmode=> ':raw',atomic => 1 }, $docs->{$doc}{lines} );
+      open my $fh, '>:raw', $doc or croak "Could not open file $doc: $!\n";
+      $fh->autoflush(1);
+      print $fh @{ $docs->{$doc}{lines} };
+      close $fh;
     }
   }
 }
