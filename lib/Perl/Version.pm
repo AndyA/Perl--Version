@@ -5,7 +5,7 @@ use strict;
 use Carp;
 use Scalar::Util qw( blessed );
 
-our $VERSION = '1.013';
+our $VERSION = '1.013_01';
 
 use overload (
   '""'  => \&stringify,
@@ -371,7 +371,7 @@ Perl::Version - Parse and manipulate Perl version strings
 
 =head1 VERSION
 
-This document describes Perl::Version version 1.013
+This document describes Perl::Version version 1.013_01
 
 =head1 SYNOPSIS
 
@@ -1055,8 +1055,6 @@ No non-core modules.
 None reported.
 
 =head1 BUGS AND LIMITATIONS
-
-No bugs have been reported.
 
 Please report any bugs or feature requests to
 C<bug-perl-version@rt.cpan.org>, or through the web interface at
