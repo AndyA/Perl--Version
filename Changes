@@ -85,3 +85,6 @@ Revision history for Perl-Version
 1.011   2011-02-21
         Remove Build.PL which didn't install perl-reversion.
 
+1.013   2014-02-12
+        Remove File::Slurp, which has a critical security issue (RT 92974)
+
