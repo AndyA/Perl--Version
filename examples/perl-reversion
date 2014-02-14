@@ -448,7 +448,6 @@ sub load_all {
     $docs->{$doc} = {
       lines => read_lines( $doc, binmode => ':raw', array_ref => 1 ),
       dirty => 0,
-      mode  => eval { (stat $doc)[2] },
     };
     $docs->{$doc}{type} = guess_type( $doc, $docs->{$doc} );
 
@@ -465,11 +464,12 @@ sub save_all {
     }
     else {
       note( "Saving $doc\n" );
+      my $mode = eval { (stat $doc)[2] & 07777 };
       open my $fh, '>:raw', $doc or croak "Could not open file $doc: $!\n";
       $fh->autoflush(1);
       print $fh @{ $docs->{$doc}{lines} };
       close $fh;
-      chmod $docs->{$doc}{mode}, $doc if defined $docs->{$doc}{mode};
+      chmod $mode, $doc if defined $mode;
     }
   }
 }
