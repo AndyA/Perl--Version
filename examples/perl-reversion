@@ -48,16 +48,13 @@ my %CONSIDER = (
 
 my $MAX_UP = 5;
 
-# Directories to skip during expansion
-my $SKIP = qr{^ [.]svn | CVS | [.]DS_Store | [.]git $}x;
-
 # Subroutines to identify file types
 my @MAGIC = (
   {
     name => 'perl',
     test => sub {
       my ( $name, $info ) = @_;
-      return 1 if $name =~ m{ [.] (?i: pl | pm | t ) $ }x;
+      return 1 if $name =~ m{ [.] (?i: pl | pm | t | xs ) $ }x;
       my $lines = $info->{lines};
       return 1 if @$lines && $lines->[0] =~ m{ ^ \#\! .* perl }ix;
       return;
@@ -87,6 +84,7 @@ my $current  = undef;
 my $set      = undef;
 my $dryrun   = undef;
 my $force_to = undef;
+my @dir_skip    = ();
 
 my %BUMP = (
   bump              => 'auto',    # original -bump behavior
@@ -101,6 +99,7 @@ GetOptions(
   'man'       => \$man,
   'current=s' => \$current,
   'set=s'     => \$set,
+  'dirskip=s' => \@dir_skip,
   (
     map {
       my $opt = $_;
@@ -133,6 +132,16 @@ pod2usage( -exitstatus => 0, -verbose => 2 ) if $man;
 
 die "Please specify either -set or -bump, not both\n"
  if $set && $bump;
+
+# Directories to skip during expansion
+my @skip = ( qw( .svn .git CVS .DS_Store ), @dir_skip );
+
+# this slightly changes the way it was done before. It's still a
+# regex, but I fixed the regex for precedence with anchors, and
+# quotemeta everything.
+my $SKIP = '^( ' . join( ' | ', map { quotemeta($_) } @skip ) . ' )$';
+note( "Regex is $SKIP" );
+$SKIP = qr/$SKIP/x;
 
 my @files = @ARGV ? expand_dirs( @ARGV ) : find_proj_files();
 
@@ -596,11 +605,14 @@ perl-reversion [options] [file ...]
     -set <version>      set the project version number
     -current <version>  specify the current version
 
+    -dskip              specify a directory not to searched
+                        you can specify this multiple times
+
     -normal             print current version in a specific format OR
     -numify             force versions to be a specific format,
     -stringify          with -set or -bump
 
-    -dryrun             just go through the motions, but don't 
+    -dryrun             just go through the motions, but don't
                         actually save files
 
 =head1 DESCRIPTION
@@ -655,6 +667,11 @@ preserved.
 
 Specify the current version. Only matching version strings will
 be updated.
+
+=item C<< -dskip <dir> >>
+
+Specify the directory dir not to search. This option can be selected
+multiple times.
 
 =item C<< -normal >>
 
