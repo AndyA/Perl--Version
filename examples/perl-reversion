@@ -220,6 +220,16 @@ if ( defined $new_ver ) {
   save_all( \%documents );
 }
 
+sub version_re_perl_pack {
+  my $ver_re = shift;
+
+  return
+   qr{ ^(\s*package\s+\w+[:\w]*\s+ \D* )
+                 $ver_re 
+                 ( .* ) $ }x;
+}
+
+
 sub version_re_perl {
   my $ver_re = shift;
 
@@ -367,6 +377,10 @@ sub find_versions {
         {
           re   => qr{ ^ = (?! head\d\s+VERSION\b ) }x,
           goto => 'pod',
+        },
+        {
+          re   => version_re_perl_pack( $ver_re ),
+          mark => 1,
         },
         {
           re   => version_re_pod( $ver_re ),
