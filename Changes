@@ -47,8 +47,7 @@ Revision history for Perl module Perl::Version
         Fixes for perl-reversion:
         * Allow any of the version formats as options for displaying or
           setting/bumping the version.
-        * Display current version in the format found rather than as though
-          -normal had been used.
+        * Display current version in the format found rather than as though -normal had been used.
         * Allow more specific -bump-<component> options.
         * Using -current=1.2 no longer matches 1.2.3 in some cases
 
