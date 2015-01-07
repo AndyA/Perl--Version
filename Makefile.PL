@@ -1,8 +1,10 @@
 use strict;
 use warnings;
-use ExtUtils::MakeMaker;
 
 eval 'use ExtUtils::MakeMaker::Coverage';
+
+my $github    = 'https://github.com/briandfoy/';
+my $main_file = 'lib/Perl/Version.pm';
 
 my %ARGS = (
   license( 'perl' ),
@@ -44,3 +46,23 @@ sub license {
    unless $ExtUtils::MakeMaker::VERSION >= '6.31';
   return ( LICENSE => $lic );
 }
+
+sub arguments { \%WriteMakefile }
+
+do_it() unless caller;
+sub do_it {
+	require File::Spec;
+	my $MM ='ExtUtils::MakeMaker';
+	my $MM_version =
+		eval{ "$MM " . $WriteMakefile{'CONFIGURE_REQUIRES'}{'ExtUtils::MakeMaker'} }
+			//
+		"$MM 6.64";
+	eval "use $MM_version";
+	eval "use Test::Manifest 1.21" 
+		if -e File::Spec->catfile( qw(t test_manifest) );
+	WriteMakefile( %WriteMakefile );
+	}
+
+
+no warnings;
+__PACKAGE__;
