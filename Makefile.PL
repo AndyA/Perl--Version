@@ -1,17 +1,19 @@
+use 5.008;
 use strict;
 use warnings;
 
-eval 'use ExtUtils::MakeMaker::Coverage';
-
+my $module    = 'Perl::Version';
 my $github    = 'https://github.com/briandfoy/Perl--Version';
-my $main_file = 'lib/Perl/Version.pm';
+my $main_file = catfile( 'lib', split /::/, "$module.pm" );
 
 my %WriteMakefile = (
 	LICENSE       => 'perl',
-	NAME          => 'Perl::Version',
+	NAME          => $module,
 	AUTHOR        => 'Andy Armstrong <andy@hexten.net>',
 	VERSION_FROM  => $main_file,
 	ABSTRACT_FROM => $main_file,
+
+	EXE_FILES => ['examples/perl-reversion'],
 
 	'CONFIGURE_REQUIRES' => {
 		'ExtUtils::MakeMaker' => '6.64',
@@ -33,12 +35,6 @@ my %WriteMakefile = (
 		'Data::Dumper'       => 0,
 		},
 	
-	EXE_FILES => ['examples/perl-reversion'],
-
-	dist      => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-
-	clean => { FILES => 'Perl-Version-*' },
-
 	'META_MERGE' => {
 		'meta-spec' => { version => 2 },
 		resources => {
@@ -53,7 +49,9 @@ my %WriteMakefile = (
 			homepage => $github,
 			},
 		},
-);
+
+	clean => { FILES => 'Perl-Version-*' },
+	);
 
 sub arguments { \%WriteMakefile }
 
@@ -66,6 +64,7 @@ sub do_it {
 			//
 		"$MM 6.64";
 	eval "use $MM_version" || die "Could not load $MM_version: $@";
+	eval 'use ExtUtils::MakeMaker::Coverage';
 	eval "use Test::Manifest 1.21" 
 		if -e File::Spec->catfile( qw(t test_manifest) );
 	WriteMakefile( %WriteMakefile );
