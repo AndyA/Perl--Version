@@ -1,8 +1,12 @@
 use 5.008;
+
+package Perl::Version;
 use strict;
 use warnings;
 
-my $module    = 'Perl::Version';
+use File::Spec::Functions qw(catfile);
+
+my $module    = __PACKAGE__;
 my $github    = 'https://github.com/briandfoy/Perl--Version';
 my $main_file = catfile( 'lib', split /::/, "$module.pm" );
 
@@ -16,7 +20,8 @@ my %WriteMakefile = (
 	EXE_FILES => ['examples/perl-reversion'],
 
 	'CONFIGURE_REQUIRES' => {
-		'ExtUtils::MakeMaker' => '6.64',
+		'ExtUtils::MakeMaker'   => '6.64',
+		'File::Spec::Functions' => '0',
 		},
 
 	'BUILD_REQUIRES' => {
