@@ -3,6 +3,8 @@ use strict;
 use warnings;
 
 my $module    = 'Perl::Version';
+( my $dist = $module ) =~ s/::/-/g;
+
 my $github    = 'https://github.com/briandfoy/Perl--Version';
 my $main_file = catfile( 'lib', split /::/, "$module.pm" );
 
