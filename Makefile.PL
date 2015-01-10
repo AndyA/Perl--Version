@@ -53,7 +53,7 @@ my %WriteMakefile = (
 			},
 		},
 
-	clean => { FILES => 'Perl-Version-*' },
+	clean => { FILES => "$dist-*" },
 	);
 
 sub arguments { \%WriteMakefile }
