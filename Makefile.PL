@@ -1,8 +1,10 @@
 use 5.008;
+
+package Perl::Version;
 use strict;
 use warnings;
 
-my $module    = 'Perl::Version';
+my $module    = __PACKAGE__;
 ( my $dist = $module ) =~ s/::/-/g;
 
 my $github    = 'https://github.com/briandfoy/Perl--Version';
