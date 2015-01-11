@@ -13,13 +13,15 @@ my $github    = 'https://github.com/briandfoy/Perl--Version';
 my $main_file = catfile( 'lib', split /::/, "$module.pm" );
 
 my %WriteMakefile = (
-	LICENSE       => 'perl',
-	NAME          => $module,
-	AUTHOR        => 'Andy Armstrong <andy@hexten.net>',
-	VERSION_FROM  => $main_file,
-	ABSTRACT_FROM => $main_file,
+	'MIN_PERL_VERSION' => '5.008',
 
-	EXE_FILES => ['examples/perl-reversion'],
+	'NAME'          => $module,
+	'VERSION_FROM'  => $main_file,
+	'ABSTRACT_FROM' => $main_file,
+	'AUTHOR'        => 'Andy Armstrong <andy@hexten.net>',
+	'LICENSE'       => 'perl',
+
+	'EXE_FILES' => ['examples/perl-reversion'],
 
 	'CONFIGURE_REQUIRES' => {
 		'ExtUtils::MakeMaker'   => '6.64',
