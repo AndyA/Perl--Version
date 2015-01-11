@@ -1,3 +1,9 @@
+#!include_default
+
+\.releaserc
+\.lwpcookies
+\.travis\.yml
+
 \.tmproj$
 \.tar\.gz$
 \B\.svn\b
