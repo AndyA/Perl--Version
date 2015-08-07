@@ -1,7 +1,6 @@
-.travis.yml
 Changes
 examples/perl-reversion
-lib/.DS_Store
+INSTALL.SKIP
 lib/Perl/Version.pm
 LICENSE
 Makefile.PL
