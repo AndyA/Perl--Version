@@ -225,7 +225,7 @@ sub version_re_perl_pack {
 
   return
    qr{ ^(\s*package\s+\w+[:\w]*\s+ \D* )
-                 $ver_re 
+                 $ver_re
                  ( .* ) $ }x;
 }
 
@@ -235,9 +235,15 @@ sub version_re_perl {
 
   return
    qr{ ^ ( .*?  [\$\*] (?: \w+ (?: :: | ' ) )* VERSION \s* = \D*? )
-                 $ver_re 
+                 $ver_re
                  ( .* \s*) \z }x;
 }
+
+sub version_re_test {
+  my $ver_re = shift;
+  return qr{ ^ ( .*? use_ok .*? ) $ver_re ( .* \s*) \z }x;
+}
+
 
 sub version_re_pod {
   my $ver_re = shift;
@@ -379,6 +385,10 @@ sub find_versions {
           goto => 'pod',
         },
         {
+          re   => version_re_test( $ver_re ),
+          mark => 1,
+        },
+        {
           re   => version_re_perl_pack( $ver_re ),
           mark => 1,
         },
@@ -467,7 +477,7 @@ sub load_all {
 
   for my $doc ( keys %$docs ) {
 
-    #note( "Loading $doc\n" );    
+    #note( "Loading $doc\n" );
     $docs->{$doc} = {
       lines => read_lines( $doc, binmode => ':raw', array_ref => 1 ),
       dirty => 0,
