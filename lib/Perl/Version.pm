@@ -5,7 +5,7 @@ use strict;
 use Carp;
 use Scalar::Util qw( blessed );
 
-our $VERSION = '1.013_02';
+our $VERSION = '1.013_03';
 
 use overload (
   '""'  => \&stringify,
