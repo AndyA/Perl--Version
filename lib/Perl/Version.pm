@@ -373,7 +373,7 @@ Perl::Version - Parse and manipulate Perl version strings
 
 =head1 VERSION
 
-This document describes Perl::Version version 1.013_02
+This document describes Perl::Version version 1.013_03
 
 =head1 SYNOPSIS
 
