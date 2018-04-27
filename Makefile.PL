@@ -50,7 +50,7 @@ my %WriteMakefile = (
 	'VERSION_FROM'  => $main_file,
 	'ABSTRACT_FROM' => $main_file,
 	'AUTHOR'        => 'Andy Armstrong <andy@hexten.net>',
-	'LICENSE'       => 'artistic2',
+	'LICENSE'       => 'artistic_2',
 
 	'EXE_FILES' => ['examples/perl-reversion'],
 
