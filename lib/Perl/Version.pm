@@ -863,7 +863,7 @@ Return a numeric representation of a version. The numeric form is most
 frequently used for versions of Perl itself.
 
     my $version = Perl::Version->new( '5.8.7_1' );
-    print $version->normal, "\n";
+    print $version->numify, "\n";
 
 prints
 
