@@ -106,3 +106,6 @@
 ^MYMETA\..*$
 ^patch\.
 
+\bMANIFEST\s\d
+\bChanges\s\d
+
