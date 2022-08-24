@@ -5,7 +5,7 @@ use strict;
 use Carp;
 use Scalar::Util qw( blessed );
 
-our $VERSION = '1.013';
+our $VERSION = '1.014';
 
 use overload (
   '""'  => \&stringify,
@@ -67,7 +67,7 @@ BEGIN {
 
 sub new {
   my $class = shift;
-  my $self 
+  my $self
    = bless {}, ref $class
    || $class
    || croak "new must be called as a class or object method";
@@ -365,13 +365,15 @@ sub set {
 1;
 __END__
 
+=encoding utf8
+
 =head1 NAME
 
 Perl::Version - Parse and manipulate Perl version strings
 
 =head1 VERSION
 
-This document describes Perl::Version version 1.013
+This document describes Perl::Version version 1.014
 
 =head1 SYNOPSIS
 
@@ -471,7 +473,7 @@ component? Perl::Version will assume that it is:
     my $version = Perl::Version->new( '1.10.03' );
     $version->inc_revision;
     print "$version\n";
-    
+
 will print
 
     2.00.00
@@ -487,7 +489,7 @@ the same length when stringifying the version.
 
 =head2 Version Formats
 
-Perl::Version supports a few different version string formats. 
+Perl::Version supports a few different version string formats.
 
 =over
 
@@ -543,7 +545,7 @@ Perl::Version will successfully parse vstrings
 
     my $version = Perl::Version->new( v1.2 );
     print "$version\n";
-    
+
 prints
 
     v1.2
@@ -584,11 +586,11 @@ internal format. This means that
 
     # Numeric version
     print Perl::Version->new( 1.001_001 )->stringify;
-    
+
 prints
 
     1.001001
-    
+
 but
 
     # String version
@@ -597,7 +599,7 @@ but
 prints
 
     1.001_001
-    
+
 as expected.
 
 In general you should probably avoid versions expressed either as
@@ -632,7 +634,7 @@ the first three components are named 'revision', 'version' and
 
     $ perl -V
     Summary of my perl5 (revision 5 version 8 subversion 6) configuration:
-    
+
     (etc)
 
 Perl::Version follows that convention. Any component may be accessed by
@@ -645,11 +647,11 @@ L<version> and L<subversion>.
 is the same as
 
     $version->inc_revision;
-    
+
 and
 
     my $subv = $version->subversion;
-    
+
 is the same as
 
     my $subv = $version->component( 2 );
@@ -731,10 +733,10 @@ Set or get one of the components of a version.
 
     # Set the subversion
     $version->component( 2, 17 );
-    
+
     # Get the revision
     my $rev = $version->component( 0 );
-    
+
 Instead of a component number you may pass a name: 'revision',
 'version', 'subversion' or 'alpha':
 
@@ -746,13 +748,13 @@ Get or set all of the components of a version.
 
     # Set the number of components
     $version->components( 4 );
-    
+
     # Get the number of components
     my $parts = $version->components;
-    
+
     # Get the individual components as an array
     my @parts = $version->components;
-    
+
     # Set the components from an array
     $version->components( [ 5, 9, 2 ] );
 
@@ -776,7 +778,7 @@ Get or set the alpha component of a version. Returns 0 for versions with no alph
 
     # Set alpha
     $version->alpha( 12 );
-    
+
     # Get alpha
     my $alp = $version->alpha;
 
@@ -810,7 +812,7 @@ Increment a component of a version.
     my $version = Perl::Version->new( '3.1.4' );
     $version->increment( 1 );
     print "$version\n";
-    
+
 prints
 
     3.2.0
@@ -850,7 +852,7 @@ Return a normalised representation of a version.
 
     my $version = Perl::Version->new( '5.008007_01' );
     print $version->normal, "\n";
-    
+
 prints
 
     v5.8.7_001
@@ -861,7 +863,7 @@ Return a numeric representation of a version. The numeric form is most
 frequently used for versions of Perl itself.
 
     my $version = Perl::Version->new( '5.8.7_1' );
-    print $version->normal, "\n";
+    print $version->numify, "\n";
 
 prints
 
@@ -905,7 +907,7 @@ depending on their ordering. Comparisons are semantically correct so that
     my $v2 = Perl::Version->new( '1.1.3' );
 
     print ($v1->vcmp( $v2 ) > 0 ? 'yes' : 'no'), "\n";
-    
+
 prints
 
     yes
@@ -953,7 +955,7 @@ body of the version and any alpha suffix respectively.
     my $version = 'v1.2.3.4_5';
     my ($prefix, $main, $suffix) = ($version =~ Perl::Version::REGEX);
     print "$prefix\n$main\n$suffix\n";
-    
+
 prints
 
     v
@@ -968,10 +970,10 @@ part, the main body of the version, any alpha suffix and any
 trailing spaces respectively.
 
     my $version = '  v1.2.3.4_5  ';
-    my ($before, $prefix, $main, $suffix, $after) 
+    my ($before, $prefix, $main, $suffix, $after)
                  = ($version =~ Perl::Version::MATCH);
     print "|$before|$prefix|$main|$suffix|$after|\n";
-    
+
 prints
 
     | |v|1.2.3.4|_5| |
@@ -998,11 +1000,11 @@ version. Valid versions match this regex:
 C<new> can't be called as a normal subroutine. Use
 
     $version_object->new( '1.2.3' );
-    
+
 or
 
     Perl::Version->new( '1.2.3' );
-    
+
 instead of
 
     Perl::Version::new( '1.2.3' );
@@ -1056,8 +1058,6 @@ None reported.
 
 =head1 BUGS AND LIMITATIONS
 
-No bugs have been reported.
-
 Please report any bugs or feature requests to
 C<bug-perl-version@rt.cpan.org>, or through the web interface at
 L<http://rt.cpan.org>.
@@ -1070,7 +1070,7 @@ Hans Dieter Pearcey C<< <hdp@cpan.org> >>
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2007, Andy Armstrong C<< <andy@hexten.net> >>. All rights reserved.
+Copyright © 2007-2021, Andy Armstrong C<< <andy@hexten.net> >>. All rights reserved.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.

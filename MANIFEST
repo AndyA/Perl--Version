@@ -1,10 +1,12 @@
 Changes
 examples/perl-reversion
+INSTALL.SKIP
 lib/Perl/Version.pm
+LICENSE
 Makefile.PL
-MANIFEST
+MANIFEST			This list of files
 Notes.txt
-README
+README.pod
 t/00.load.t
 t/05.misc.t
 t/10.regression.t
@@ -14,3 +16,4 @@ t/40.perl-reversion.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
+xt/changes.t
