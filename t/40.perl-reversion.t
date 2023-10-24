@@ -60,7 +60,7 @@ sub with_file {
   print $fh $content;
   close $fh;
   $code->();
-  unlink "$dir/$name" or die "Can't unlink $dir/$name: $!";
+  unlink $path or die "Can't unlink $path: $!";
 }
 
 sub count_newlines {
