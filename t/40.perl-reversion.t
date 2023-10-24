@@ -6,8 +6,6 @@ use Test::More;
 use File::Temp;
 use File::Path qw(mkpath);
 use File::Spec;
-use FileHandle;
-use File::Slurp::Tiny qw(read_file);
 use Data::Dumper;
 
 if ( $^O =~ /MSWin32/ ) {
@@ -56,8 +54,8 @@ sub _run {
 
 sub with_file {
   my ( $name, $content, $code ) = @_;
-  my $fh = FileHandle->new( "> $dir/$name" )
-   or die "Can't open $dir/$name: $!";
+  my $path = File::Spec->catfile( $dir, $name );
+  open my $fh, '>', $path or die "Can't open $path: $!";
   binmode $fh;
   print $fh $content;
   close $fh;
@@ -69,8 +67,11 @@ sub count_newlines {
     my @newlines= ("\x{0d}\x{0a}","\x{0d}","\x{0a}");
     my %result;
     for my $name (@_) {
-        my $content= read_file($name, binmode => ':raw' );
-        
+        local $/;
+        open my $fh, '<:raw', $name;
+        my $content = do { local $/; <$fh> };
+        close $fh;
+
         $result{ $name }= +{
             map {
                 my $key= unpack 'H*', $_;
@@ -120,8 +121,7 @@ sub runtests {
   );
 }
 
-FileHandle->new( "> $dir/Makefile.PL" );
-mkpath( "$dir/lib" );
+mkpath( File::Spec->catfile( $dir, "lib" ) );
 
 with_file(
   "META.yml", <<'END',
