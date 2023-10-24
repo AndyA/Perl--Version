@@ -71,7 +71,6 @@ my %WriteMakefile = (
 		'Scalar::Util'       => 0,
 		'Getopt::Long'       => '2.34',
 		'Pod::Usage'         => '1.3',
-		'File::Slurp::Tiny'  => 0,
 		'Data::Dumper'       => 0,
 		},
 
