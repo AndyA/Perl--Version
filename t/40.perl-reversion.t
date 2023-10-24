@@ -86,7 +86,7 @@ sub count_newlines {
 sub ok_newlines {
     my( $name, %expected ) = @_;
     my %got= count_newlines( keys %expected );
-    
+
     is_deeply \%got, \%expected,
         "$name - All newlines remain intact"
       or diag Dumper [ \%expected, \%got ];
@@ -95,7 +95,7 @@ sub ok_newlines {
 
 sub runtests {
   my ( $name, $version ) = @_;
-  
+
   # Check that we keep line endings consistent:
   my @files= (grep { -f } glob( "$dir/*" ), glob( "$dir/*/*" ) );
   my %newlines= count_newlines( @files );
